@@ -3,14 +3,9 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useTrainingStore } from '@/stores'
 import { useVapiCall } from '@/hooks/useVapiCall'
 import { getScenarioMetadata } from '@/lib/scenarios'
+import { formatTime } from '@/lib/time'
 import type { ScenarioType } from '@/types/database'
 import { useOverlay, ConfirmModal } from '@/components/ui/overlay'
-
-function formatTime(seconds: number): string {
-  const mins = Math.floor(seconds / 60)
-  const secs = seconds % 60
-  return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
-}
 
 function CallPage() {
   const navigate = useNavigate()

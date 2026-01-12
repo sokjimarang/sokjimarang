@@ -3,12 +3,15 @@ import Vapi from '@vapi-ai/web'
 import { useTrainingStore, useUserStore } from '@/stores'
 import { getScenario, hasEndScenarioTag } from '@/lib/scenarios'
 import { supabase, isSupabaseConfigured } from '@/lib/supabase'
+import {
+  MAX_CALL_DURATION_SECONDS,
+  TIMER_INTERVAL_MS,
+  END_SCENARIO_DELAY_MS,
+} from '@/lib/constants'
 import type { ScenarioType, TrainingSession } from '@/types/database'
 
 const VAPI_PUBLIC_KEY = import.meta.env.VITE_VAPI_PUBLIC_KEY
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL
-
-const MAX_CALL_DURATION_SECONDS = 5 * 60 // 5 minutes
 
 interface UseVapiCallOptions {
   scenarioType: ScenarioType
@@ -91,7 +94,7 @@ function useVapiCall({ scenarioType, announceTraining, onCallEnd }: UseVapiCallO
             maxDurationReachedRef.current = true
             vapi.stop()
           }
-        }, 1000)
+        }, TIMER_INTERVAL_MS)
       })
 
       vapi.on('call-end', () => {
@@ -124,7 +127,7 @@ function useVapiCall({ scenarioType, announceTraining, onCallEnd }: UseVapiCallO
           if (speaker === 'ai' && hasEndScenarioTag(message.transcript)) {
             setTimeout(() => {
               vapi.stop()
-            }, 2000)
+            }, END_SCENARIO_DELAY_MS)
           }
         }
       })
