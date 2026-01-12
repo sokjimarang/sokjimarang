@@ -1,36 +1,82 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 속지마랑 (Sokjimarang)
 
-## Getting Started
+실제 보이스피싱 시나리오를 AI 음성 에이전트로 시뮬레이션하여 예방 교육 효과를 제공하는 서비스입니다.
 
-First, run the development server:
+## 핵심 기능
+
+- **체험 기반 학습**: 실제와 유사한 보이스피싱 상황 체험
+- **실시간 상호작용**: AI가 사용자 반응에 따라 동적으로 대응
+- **안전한 실패 경험**: 실제 피해 없이 "속아보는" 경험
+- **즉각적 피드백**: 통화 직후 대응 방법 교육 (디브리핑)
+
+## 기술 스택
+
+| 영역 | 기술 |
+|------|------|
+| **Frontend** | React 19, Vite, TypeScript, TailwindCSS |
+| **상태 관리** | TanStack Query, Zustand |
+| **Backend** | Supabase (PostgreSQL, Auth, Storage, Edge Functions) |
+| **Voice AI** | Vapi.ai, OpenAI Whisper, Google Gemini, ElevenLabs |
+| **배포** | Cloudflare Pages |
+
+> 상세한 기술 스택 문서는 [docs/TECH_STACK.md](./docs/TECH_STACK.md)를 참고하세요.
+
+## 시작하기
+
+### 사전 요구사항
+
+- Node.js 20+
+- pnpm 9+
+- Supabase 계정
+- Vapi.ai 계정
+
+### 설치
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# 의존성 설치
+pnpm install
+
+# 환경변수 설정
+cp .env.example .env.local
+# .env.local 파일을 편집하여 필요한 키 입력
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 개발 서버 실행
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+pnpm dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+[http://localhost:5173](http://localhost:5173)에서 확인할 수 있습니다.
 
-## Learn More
+### 빌드
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+pnpm build
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 프로젝트 구조
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+sokjimarang/
+├── src/
+│   ├── routes/          # 페이지 컴포넌트
+│   ├── components/      # 재사용 컴포넌트
+│   ├── lib/             # 외부 서비스 클라이언트
+│   ├── hooks/           # 커스텀 훅
+│   ├── stores/          # 상태 관리
+│   └── types/           # TypeScript 타입
+├── supabase/
+│   ├── functions/       # Edge Functions
+│   └── migrations/      # DB 마이그레이션
+└── docs/                # 문서
+```
 
-## Deploy on Vercel
+## 문서
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- [기술 스택 상세](./docs/TECH_STACK.md)
+- [기획서 리뷰](./docs/proposal-review.md)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 라이선스
+
+Private - All rights reserved
