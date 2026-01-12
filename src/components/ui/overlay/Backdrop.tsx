@@ -1,4 +1,4 @@
-import { useState, useEffect, type ReactNode } from 'react'
+import { useRef, useCallback, type ReactNode } from 'react'
 
 interface BackdropProps {
   isOpen: boolean
@@ -8,8 +8,6 @@ interface BackdropProps {
   children: ReactNode
 }
 
-const ANIMATION_DURATION = 200
-
 function Backdrop({
   isOpen,
   onClick,
@@ -17,24 +15,13 @@ function Backdrop({
   alignBottom = false,
   children,
 }: BackdropProps) {
-  const [shouldRender, setShouldRender] = useState(isOpen)
-  const [isExiting, setIsExiting] = useState(false)
+  const backdropRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
-    if (isOpen) {
-      setShouldRender(true)
-      setIsExiting(false)
-    } else if (shouldRender) {
-      setIsExiting(true)
-      const timer = setTimeout(() => {
-        setShouldRender(false)
-        setIsExiting(false)
-      }, ANIMATION_DURATION)
-      return () => clearTimeout(timer)
+  const handleAnimationEnd = useCallback(() => {
+    if (!isOpen && backdropRef.current) {
+      backdropRef.current.style.display = 'none'
     }
-  }, [isOpen, shouldRender])
-
-  if (!shouldRender) return null
+  }, [isOpen])
 
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget && closeOnClick && onClick) {
@@ -42,15 +29,19 @@ function Backdrop({
     }
   }
 
+  if (!isOpen) return null
+
   return (
     <div
+      ref={backdropRef}
       className={`
         fixed inset-0 z-[1000] flex
         ${alignBottom ? 'items-end' : 'items-center'}
         justify-center bg-black/50
-        ${isExiting ? 'animate-fade-out' : 'animate-fade-in'}
+        animate-fade-in
       `}
       onClick={handleBackdropClick}
+      onAnimationEnd={handleAnimationEnd}
       role="dialog"
       aria-modal="true"
     >

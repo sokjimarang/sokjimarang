@@ -1,27 +1,11 @@
-import {
-  createContext,
-  useContext,
-  useState,
-  useCallback,
-  useEffect,
-  type ReactNode,
-} from 'react'
+import { useState, useCallback, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
+import { OverlayContext, type OverlayContextType } from './useOverlay'
 
 type OverlayElement = {
   id: string
   element: ReactNode
 }
-
-type OverlayContextType = {
-  open: <T>(
-    render: (props: { close: (result?: T) => void; isOpen: boolean }) => ReactNode
-  ) => Promise<T | undefined>
-  close: (id: string) => void
-  closeAll: () => void
-}
-
-const OverlayContext = createContext<OverlayContextType | null>(null)
 
 interface OverlayProviderProps {
   children: ReactNode
@@ -32,11 +16,6 @@ function OverlayProvider({ children }: OverlayProviderProps) {
   const [resolvers, setResolvers] = useState<Map<string, (value: unknown) => void>>(
     new Map()
   )
-  const [isMounted, setIsMounted] = useState(false)
-
-  useEffect(() => {
-    setIsMounted(true)
-  }, [])
 
   const generateId = useCallback(() => {
     return Math.random().toString(36).slice(2) + Date.now().toString(36)
@@ -96,10 +75,12 @@ function OverlayProvider({ children }: OverlayProviderProps) {
     closeAll,
   }
 
+  const canUseDOM = typeof window !== 'undefined'
+
   return (
     <OverlayContext.Provider value={contextValue}>
       {children}
-      {isMounted &&
+      {canUseDOM &&
         overlays.length > 0 &&
         createPortal(
           <>
@@ -115,12 +96,4 @@ function OverlayProvider({ children }: OverlayProviderProps) {
   )
 }
 
-function useOverlay() {
-  const context = useContext(OverlayContext)
-  if (!context) {
-    throw new Error('useOverlay must be used within OverlayProvider')
-  }
-  return context
-}
-
-export { OverlayProvider, useOverlay }
+export { OverlayProvider }
