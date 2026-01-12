@@ -31,8 +31,8 @@ target-reader: AI 활용 개발자
 │                        System Components                     │
 │                                                              │
 │  ┌──────────────────┐      ┌──────────────────────────────┐ │
-│  │   React Native   │◄────►│   ElevenLabs Conversational  │ │
-│  │       App        │      │           AI Agent           │ │
+│  │  React Web App   │◄────►│   ElevenLabs Conversational  │ │
+│  │  (RN WebView)    │      │           AI Agent           │ │
 │  │                  │      │                              │ │
 │  │  - UI Rendering  │      │  - ASR (음성→텍스트)         │ │
 │  │  - State Mgmt    │      │  - LLM (응답 생성)           │ │
@@ -48,12 +48,13 @@ target-reader: AI 활용 개발자
 
 | 구분 | 기술 | 버전 | 용도 |
 | --- | --- | --- | --- |
-| 프레임워크 | React Native | 0.73+ | 크로스플랫폼 앱 |
+| 웹 프레임워크 | React + Vite | React 19+, Vite 6+ | 웹 앱 개발 |
+| 앱 래핑 | React Native WebView | - | 웹앱을 네이티브 앱으로 래핑 |
 | 언어 | TypeScript | 5.0+ | 타입 안정성 |
-| 상태관리 | Zustand 또는 Redux Toolkit | - | 앱 상태 관리 |
+| 상태관리 | Zustand | - | 앱 상태 관리 |
 | Voice AI | ElevenLabs Conversational AI | - | 음성 대화 |
 | 음성 스트리밍 | WebSocket | - | 실시간 양방향 오디오 |
-| 로컬 저장소 | AsyncStorage | - | 설정, 훈련 기록 |
+| 로컬 저장소 | localStorage | - | 설정, 훈련 기록 |
 
 ---
 
@@ -567,7 +568,7 @@ const agentConfig = {
 ### 4.3 WebSocket 통신 흐름
 
 ```
-React Native App                    ElevenLabs Agent
+React Web App (RN WebView)          ElevenLabs Agent
        │                                   │
        │──── 세션 시작 요청 ────────────────►│
        │     (agent_id, config)            │
@@ -832,8 +833,9 @@ interface ErrorDialogProps {
 - [ ]  ElevenLabs 계정 생성 및 API 키 발급
 - [ ]  ElevenLabs Agent 생성 (4개 시나리오)
 - [ ]  한국어 음성 선택 및 테스트
-- [ ]  React Native 프로젝트 초기화
-- [ ]  필수 라이브러리 설치 (WebSocket, AsyncStorage 등)
+- [ ]  React + Vite 프로젝트 초기화
+- [ ]  필수 라이브러리 설치 (WebSocket, Zustand 등)
+- [ ]  React Native WebView 래퍼 프로젝트 설정
 
 ### 8.2 화면별 개발 체크리스트
 
@@ -841,7 +843,7 @@ interface ErrorDialogProps {
 
 - [ ]  스와이프 페이지네이션
 - [ ]  체크박스 상태 관리
-- [ ]  AsyncStorage 저장
+- [ ]  localStorage 저장
 
 **메인**
 
