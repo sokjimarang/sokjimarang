@@ -1,4 +1,5 @@
-export { OverlayProvider, useOverlay } from './OverlayProvider'
+export { OverlayProvider } from './OverlayProvider'
+export { useOverlay } from './useOverlay'
 export { Backdrop } from './Backdrop'
 export { Modal } from './Modal'
 export { Sheet } from './Sheet'
