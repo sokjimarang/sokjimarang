@@ -247,6 +247,108 @@ ELEVENLABS_API_KEY=xxx
 
 ---
 
+## 추가 기술 스택 분석
+
+### 웹앱 + React Native WebView 방식 검토
+
+PRD에서는 React Native 앱을 명시했지만, 웹앱으로 구현 후 RN WebView로 감싸는 방식도 검토했습니다.
+
+#### ElevenLabs SDK 지원 현황
+
+| 패키지 | 용도 | 비고 |
+|--------|------|------|
+| `@elevenlabs/client` | Vanilla JS / 범용 | 브라우저 완전 지원 |
+| `@11labs/react` | React 전용 훅 | 웹앱 구현에 최적 |
+
+**결론**: ElevenLabs는 **웹 우선 설계**입니다. 공식 SDK가 JavaScript/React 기반으로, 오히려 웹앱 구현이 더 자연스러울 수 있습니다.
+
+#### iOS 버전 호환성
+
+| iOS 버전 | 한국 점유율 | WebView 마이크 지원 |
+|----------|-------------|---------------------|
+| iOS 18.x+ | ~79% | ✅ 완전 지원 |
+| iOS 14.3~17.x | ~13% | ✅ 지원 |
+| iOS 14.3 미만 | ~8% | ❌ 미지원 |
+
+**iOS 14.3 미만 대응 전략**: 앱 스토어 최소 버전을 iOS 14.3으로 설정하거나, 해당 버전에서는 "이 기기에서는 지원되지 않습니다" 메시지를 표시할 수 있습니다.
+
+#### 실시간 음성 지연시간 기준
+
+| 지연시간 | 품질 등급 | 비고 |
+|----------|-----------|------|
+| < 20ms | 최적 | 지연 감지 불가 |
+| 20~150ms | 양호 | 원활한 대화 |
+| 150~300ms | 허용 | 약간의 지연 감지 |
+| > 300ms | 불량 | 대화 끊김 발생 |
+
+WebView 방식 예상 총 지연: **70~150ms** → 양호(Good) 범위 내
+
+---
+
+### WebSocket vs WebRTC 비교
+
+ElevenLabs Conversational AI는 두 가지 연결 방식을 지원합니다.
+
+#### 기본 비교
+
+| 구분 | WebSocket | WebRTC |
+|------|-----------|--------|
+| **프로토콜** | TCP | UDP |
+| **연결 방식** | Client ↔ Server | Peer-to-Peer |
+| **지연시간** | ~100-150ms | ~75-100ms |
+| **패킷 손실 처리** | 재전송 (지연 발생) | 손실 허용 (흐름 유지) |
+
+#### ElevenLabs에서의 차이
+
+| 기능 | WebSocket | WebRTC |
+|------|-----------|--------|
+| 기본 설정 | ✅ 기본값 | 선택 옵션 |
+| 에코 제거 | 기본 | **고급 (내장)** |
+| 배경 소음 제거 | 기본 | **고급 (내장)** |
+| 오디오 포맷 | 설정 가능 | `pcm_48000` 고정 |
+| 인증 방식 | Signed URL | Conversation Token |
+| RN SDK 지원 | ✅ 지원 | ⏳ 예정 |
+
+#### 사용 방식
+
+```typescript
+// WebSocket (기본)
+const conversation = await Conversation.startSession({
+  agentId: "<your-agent-id>",
+  connectionType: "websocket",
+});
+
+// WebRTC (권장 - 더 낮은 지연시간)
+const conversation = await Conversation.startSession({
+  agentId: "<your-agent-id>",
+  connectionType: "webrtc",
+});
+```
+
+#### 비용
+
+WebSocket과 WebRTC 간 **비용 차이 없음**. ElevenLabs Conversational AI 가격:
+
+| 플랜 | 분당 비용 | 포함 시간 |
+|------|-----------|-----------|
+| Free | - | 15분 |
+| Creator | $0.10/분 | 250분 |
+| Pro | $0.10/분 | 1,100분 |
+| Business (연간) | $0.08/분 | 13,750분 |
+
+#### 권장사항
+
+**"WebSocket으로 시작 → 추후 WebRTC 전환"** 전략 권장:
+
+1. WebSocket이 기본값이라 초기 구현이 간단
+2. WebRTC는 React Native SDK 지원 예정 (아직 미출시)
+3. 비용 차이 없음 → 나중에 전환해도 손해 없음
+4. **지연시간 최적화 팁**: WebSocket 대신 WebRTC를 사용하면 추가로 10~20ms 지연을 줄일 수 있습니다.
+
+> 참고: ElevenLabs는 자사 서비스(11.ai)를 이미 전부 WebRTC로 전환했습니다.
+
+---
+
 ## 참고 문서
 
 - [React 공식 문서](https://react.dev)
@@ -255,3 +357,7 @@ ELEVENLABS_API_KEY=xxx
 - [Cloudflare Pages 공식 문서](https://developers.cloudflare.com/pages)
 - [Vapi.ai 공식 문서](https://docs.vapi.ai)
 - [TanStack Query 공식 문서](https://tanstack.com/query)
+- [ElevenLabs Conversational AI SDK (JS)](https://elevenlabs.io/docs/agents-platform/libraries/java-script)
+- [ElevenLabs React SDK](https://elevenlabs.io/docs/conversational-ai-sdks/javascript/react-sdk)
+- [ElevenLabs WebRTC 발표](https://elevenlabs.io/blog/conversational-ai-webrtc)
+- [ElevenLabs 지연시간 최적화](https://elevenlabs.io/docs/best-practices/latency-optimization)
