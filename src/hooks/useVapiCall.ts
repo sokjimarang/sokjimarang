@@ -8,15 +8,19 @@ import type { ScenarioType, TrainingSession } from '@/types/database'
 const VAPI_PUBLIC_KEY = import.meta.env.VITE_VAPI_PUBLIC_KEY
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL
 
+const MAX_CALL_DURATION_SECONDS = 5 * 60 // 5 minutes
+
 interface UseVapiCallOptions {
   scenarioType: ScenarioType
+  announceTraining?: boolean
   onCallEnd?: () => void
 }
 
-function useVapiCall({ scenarioType, onCallEnd }: UseVapiCallOptions) {
+function useVapiCall({ scenarioType, announceTraining, onCallEnd }: UseVapiCallOptions) {
   const vapiRef = useRef<Vapi | null>(null)
   const timerRef = useRef<number | null>(null)
   const durationRef = useRef(0)
+  const maxDurationReachedRef = useRef(false)
 
   const [isConnecting, setIsConnecting] = useState(false)
   const [isConnected, setIsConnected] = useState(false)
@@ -81,6 +85,12 @@ function useVapiCall({ scenarioType, onCallEnd }: UseVapiCallOptions) {
         timerRef.current = window.setInterval(() => {
           durationRef.current += 1
           updateCallDuration(durationRef.current)
+
+          // Auto-terminate at max duration
+          if (durationRef.current >= MAX_CALL_DURATION_SECONDS && !maxDurationReachedRef.current) {
+            maxDurationReachedRef.current = true
+            vapi.stop()
+          }
         }, 1000)
       })
 
@@ -89,7 +99,8 @@ function useVapiCall({ scenarioType, onCallEnd }: UseVapiCallOptions) {
         if (timerRef.current) {
           clearInterval(timerRef.current)
         }
-        endTraining('call_ended')
+        const reason = maxDurationReachedRef.current ? 'max_duration_reached' : 'call_ended'
+        endTraining(reason)
         onCallEnd?.()
       })
 
@@ -125,6 +136,11 @@ function useVapiCall({ scenarioType, onCallEnd }: UseVapiCallOptions) {
         setIsConnected(false)
       })
 
+      // If announceTraining is enabled, prepend the training announcement
+      const firstMessage = announceTraining
+        ? `안내드립니다. 이것은 보이스피싱 훈련입니다. 훈련이 시작됩니다. ${scenario.promptConfig.firstMessage}`
+        : scenario.promptConfig.firstMessage
+
       const call = await vapi.start({
         model: {
           provider: 'custom-llm',
@@ -135,7 +151,7 @@ function useVapiCall({ scenarioType, onCallEnd }: UseVapiCallOptions) {
           provider: 'playht',
           voiceId: 'ko-KR-Standard-A',
         },
-        firstMessage: scenario.promptConfig.firstMessage,
+        firstMessage,
         transcriber: {
           provider: 'deepgram',
           model: 'nova-2',
@@ -156,6 +172,7 @@ function useVapiCall({ scenarioType, onCallEnd }: UseVapiCallOptions) {
     }
   }, [
     scenario,
+    announceTraining,
     createSession,
     setSession,
     setVapiCallId,
