@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
 import type { ScenarioType, TrainingSession } from '@/types/database'
 
 type TrainingStatus = 'idle' | 'preparing' | 'in_call' | 'debriefing' | 'completed'
@@ -9,6 +10,14 @@ interface TranscriptMessage {
   timestamp: number
 }
 
+interface TrainingHistory {
+  id: string
+  date: string
+  scenarioType: ScenarioType
+  reachedStage: number
+  durationSeconds: number
+}
+
 interface TrainingState {
   status: TrainingStatus
   currentSession: TrainingSession | null
@@ -16,9 +25,12 @@ interface TrainingState {
   vapiCallId: string | null
   callDuration: number
   isAiSpeaking: boolean
+  selectedScenario: ScenarioType | 'random'
+  sessions: TrainingHistory[]
 }
 
 interface TrainingActions {
+  setSelectedScenario: (scenario: ScenarioType | 'random') => void
   startTraining: (scenarioType: ScenarioType) => void
   setSession: (session: TrainingSession) => void
   setVapiCallId: (callId: string) => void
@@ -27,6 +39,7 @@ interface TrainingActions {
   updateCallDuration: (seconds: number) => void
   endTraining: (reason: string) => void
   goToDebriefing: () => void
+  saveSession: () => void
   reset: () => void
 }
 
@@ -39,73 +52,109 @@ const initialState: TrainingState = {
   vapiCallId: null,
   callDuration: 0,
   isAiSpeaking: false,
+  selectedScenario: 'random',
+  sessions: [],
 }
 
-const useTrainingStore = create<TrainingStore>((set) => ({
-  ...initialState,
+const useTrainingStore = create<TrainingStore>()(
+  persist(
+    (set) => ({
+      ...initialState,
 
-  startTraining: (scenarioType) =>
-    set({
-      status: 'preparing',
-      currentSession: {
-        id: '',
-        created_at: new Date().toISOString(),
-        started_at: null,
-        ended_at: null,
-        scenario_type: scenarioType,
-        reached_stage: 0,
-        termination_reason: null,
-        duration_seconds: null,
-        vapi_call_id: null,
-        user_context: {},
-      },
-      transcripts: [],
-      callDuration: 0,
-    }),
+      setSelectedScenario: (scenario) =>
+        set({ selectedScenario: scenario }),
 
-  setSession: (session) =>
-    set({
-      currentSession: session,
-      status: 'in_call',
-    }),
+      startTraining: (scenarioType) =>
+        set({
+          status: 'preparing',
+          currentSession: {
+            id: crypto.randomUUID(),
+            created_at: new Date().toISOString(),
+            started_at: null,
+            ended_at: null,
+            scenario_type: scenarioType,
+            reached_stage: 0,
+            termination_reason: null,
+            duration_seconds: null,
+            vapi_call_id: null,
+            user_context: {},
+          },
+          transcripts: [],
+          callDuration: 0,
+        }),
 
-  setVapiCallId: (callId) =>
-    set((state) => ({
-      vapiCallId: callId,
-      currentSession: state.currentSession
-        ? { ...state.currentSession, vapi_call_id: callId }
-        : null,
-    })),
+      setSession: (session) =>
+        set({
+          currentSession: session,
+          status: 'in_call',
+        }),
 
-  addTranscript: (message) =>
-    set((state) => ({
-      transcripts: [...state.transcripts, message],
-    })),
+      setVapiCallId: (callId) =>
+        set((state) => ({
+          vapiCallId: callId,
+          currentSession: state.currentSession
+            ? { ...state.currentSession, vapi_call_id: callId }
+            : null,
+        })),
 
-  setAiSpeaking: (speaking) =>
-    set({ isAiSpeaking: speaking }),
+      addTranscript: (message) =>
+        set((state) => ({
+          transcripts: [...state.transcripts, message],
+        })),
 
-  updateCallDuration: (seconds) =>
-    set({ callDuration: seconds }),
+      setAiSpeaking: (speaking) =>
+        set({ isAiSpeaking: speaking }),
 
-  endTraining: (reason) =>
-    set((state) => ({
-      status: 'debriefing',
-      currentSession: state.currentSession
-        ? {
-            ...state.currentSession,
-            ended_at: new Date().toISOString(),
-            termination_reason: reason,
-            duration_seconds: state.callDuration,
+      updateCallDuration: (seconds) =>
+        set({ callDuration: seconds }),
+
+      endTraining: (reason) =>
+        set((state) => ({
+          status: 'debriefing',
+          currentSession: state.currentSession
+            ? {
+                ...state.currentSession,
+                ended_at: new Date().toISOString(),
+                termination_reason: reason,
+                duration_seconds: state.callDuration,
+              }
+            : null,
+        })),
+
+      goToDebriefing: () =>
+        set({ status: 'debriefing' }),
+
+      saveSession: () =>
+        set((state) => {
+          if (!state.currentSession) return state
+          const history: TrainingHistory = {
+            id: state.currentSession.id,
+            date: state.currentSession.created_at,
+            scenarioType: state.currentSession.scenario_type,
+            reachedStage: state.currentSession.reached_stage,
+            durationSeconds: state.callDuration,
           }
-        : null,
-    })),
+          return {
+            sessions: [history, ...state.sessions].slice(0, 50),
+          }
+        }),
 
-  goToDebriefing: () =>
-    set({ status: 'debriefing' }),
-
-  reset: () => set(initialState),
-}))
+      reset: () =>
+        set((state) => ({
+          ...initialState,
+          sessions: state.sessions,
+          selectedScenario: state.selectedScenario,
+        })),
+    }),
+    {
+      name: 'sokjimarang-training',
+      partialize: (state) => ({
+        sessions: state.sessions,
+        selectedScenario: state.selectedScenario,
+      }),
+    }
+  )
+)
 
 export { useTrainingStore }
-export type { TrainingState, TrainingActions, TrainingStatus, TranscriptMessage }
+export type { TrainingState, TrainingActions, TrainingStatus, TranscriptMessage, TrainingHistory }
