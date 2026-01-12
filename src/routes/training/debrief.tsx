@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useTrainingStore } from '@/stores'
 import { getScenarioMetadata, removeEndScenarioTag } from '@/lib/scenarios'
+import { formatTime } from '@/lib/time'
+import { TOTAL_STAGES, MS_PER_CHARACTER } from '@/lib/constants'
 import type { ScenarioType } from '@/types/database'
 
 type DebriefPhase = 'voice' | 'screen'
@@ -58,7 +60,7 @@ function DebriefPage() {
     utterance.rate = 0.9
 
     // Progress simulation
-    const duration = script.length * 80 // Approximate duration in ms
+    const duration = script.length * MS_PER_CHARACTER
     const intervalId = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 100) {
@@ -93,14 +95,7 @@ function DebriefPage() {
     return null
   }
 
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60)
-    const secs = seconds % 60
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
-  }
-
   const reachedStage = currentSession?.reached_stage ?? 0
-  const totalStages = 5
 
   // Phase 1: Voice Debriefing
   if (phase === 'voice') {
@@ -155,7 +150,7 @@ function DebriefPage() {
               <span className="text-gray-500">시나리오:</span> {scenario.name}
             </p>
             <p>
-              <span className="text-gray-500">진행 단계:</span> {reachedStage} / {totalStages} 단계
+              <span className="text-gray-500">진행 단계:</span> {reachedStage} / {TOTAL_STAGES} 단계
             </p>
             <p>
               <span className="text-gray-500">소요 시간:</span> {formatTime(callDuration)}

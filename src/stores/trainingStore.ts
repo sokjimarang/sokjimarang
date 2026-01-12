@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { MAX_SESSION_HISTORY } from '@/lib/constants'
 import type { ScenarioType, TrainingSession } from '@/types/database'
 
 type TrainingStatus = 'idle' | 'preparing' | 'in_call' | 'debriefing' | 'completed'
@@ -135,7 +136,7 @@ const useTrainingStore = create<TrainingStore>()(
             durationSeconds: state.callDuration,
           }
           return {
-            sessions: [history, ...state.sessions].slice(0, 50),
+            sessions: [history, ...state.sessions].slice(0, MAX_SESSION_HISTORY),
           }
         }),
 
