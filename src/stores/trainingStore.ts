@@ -27,11 +27,13 @@ interface TrainingState {
   callDuration: number
   isAiSpeaking: boolean
   selectedScenario: ScenarioType | 'random'
+  selectedPresetId: string | null
   sessions: TrainingHistory[]
 }
 
 interface TrainingActions {
   setSelectedScenario: (scenario: ScenarioType | 'random') => void
+  setSelectedPresetId: (presetId: string | null) => void
   startTraining: (scenarioType: ScenarioType) => void
   setSession: (session: TrainingSession) => void
   setVapiCallId: (callId: string) => void
@@ -54,6 +56,7 @@ const initialState: TrainingState = {
   callDuration: 0,
   isAiSpeaking: false,
   selectedScenario: 'random',
+  selectedPresetId: null,
   sessions: [],
 }
 
@@ -64,6 +67,9 @@ const useTrainingStore = create<TrainingStore>()(
 
       setSelectedScenario: (scenario) =>
         set({ selectedScenario: scenario }),
+
+      setSelectedPresetId: (presetId) =>
+        set({ selectedPresetId: presetId }),
 
       startTraining: (scenarioType) =>
         set({
@@ -145,6 +151,7 @@ const useTrainingStore = create<TrainingStore>()(
           ...initialState,
           sessions: state.sessions,
           selectedScenario: state.selectedScenario,
+          selectedPresetId: state.selectedPresetId,
         })),
     }),
     {
@@ -152,6 +159,7 @@ const useTrainingStore = create<TrainingStore>()(
       partialize: (state) => ({
         sessions: state.sessions,
         selectedScenario: state.selectedScenario,
+        selectedPresetId: state.selectedPresetId,
       }),
     }
   )
