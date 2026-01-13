@@ -8,7 +8,7 @@
  * - 지원 타입: string, number, boolean (모두 string으로 변환)
  */
 
-import { Conversation } from '@elevenlabs/elevenlabs-js/browser'
+import { Conversation } from '@elevenlabs/client'
 import type { UserContext, AgeGroup, Region } from '@/types/database'
 
 export type ConversationInstance = Awaited<ReturnType<typeof Conversation.startSession>>
@@ -26,18 +26,13 @@ const REGION_LABELS: Record<Region, string> = {
   other: '기타 지역',
 }
 
-export interface DynamicVariables {
-  age_group: string
-  region: string
-  children: string
-  grandchildren: string
-}
+export type DynamicVariables = Record<string, string | number | boolean>
 
 export interface ConversationEventHandlers {
   onConnect?: () => void
   onDisconnect?: () => void
   onMessage?: (message: { source: string; message: string }) => void
-  onError?: (error: Error) => void
+  onError?: (message: string, context?: unknown) => void
   onModeChange?: (mode: { mode: string }) => void
 }
 
@@ -74,7 +69,9 @@ export async function startConversation(
     dynamicVariables: options.dynamicVariables,
     onConnect: options.onConnect,
     onDisconnect: options.onDisconnect,
-    onMessage: options.onMessage,
+    onMessage: options.onMessage
+      ? (payload) => options.onMessage!({ source: payload.source, message: payload.message })
+      : undefined,
     onError: options.onError,
     onModeChange: options.onModeChange,
   })

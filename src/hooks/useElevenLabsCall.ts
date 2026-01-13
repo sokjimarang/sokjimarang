@@ -154,8 +154,8 @@ function useElevenLabsCall({ scenarioType, onCallEnd }: UseElevenLabsCallOptions
         onModeChange: (modeInfo) => {
           setAiSpeaking(modeInfo.mode === 'speaking')
         },
-        onError: (err) => {
-          console.error('ElevenLabs error:', err)
+        onError: (message, context) => {
+          console.error('ElevenLabs error:', message, context)
           setError('통화 중 오류가 발생했습니다')
           setIsConnecting(false)
           setIsConnected(false)
