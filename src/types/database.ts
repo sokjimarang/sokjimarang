@@ -2,11 +2,14 @@ export type ScenarioType = 'prosecutor' | 'bank' | 'family_emergency' | 'deliver
 
 export type Speaker = 'ai' | 'user'
 
+export type AgeGroup = 'under50' | '50s' | '60s' | '70plus'
+export type Region = 'seoul' | 'gyeonggi' | 'other'
+
 export interface UserContext {
-  age_group?: 'under50' | '50s' | '60s' | '70plus'
-  region?: 'seoul' | 'gyeonggi' | 'other'
-  has_children?: boolean
-  has_grandchildren?: boolean
+  age_group?: AgeGroup
+  region?: Region
+  children?: number | null
+  grandchildren?: number | null
 }
 
 export interface TrainingSession {

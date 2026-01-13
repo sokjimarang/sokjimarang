@@ -1,9 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import type { UserContext } from '@/types/database'
-
-type AgeGroup = 'under50' | '50s' | '60s' | '70plus'
-type Region = 'seoul' | 'gyeonggi' | 'other'
+import type { UserContext, AgeGroup, Region } from '@/types/database'
 
 interface UserState {
   hasCompletedOnboarding: boolean
@@ -16,8 +13,8 @@ interface UserActions {
   agreeToTerms: () => void
   setAgeGroup: (ageGroup: AgeGroup) => void
   setRegion: (region: Region) => void
-  setHasChildren: (hasChildren: boolean) => void
-  setHasGrandchildren: (hasGrandchildren: boolean) => void
+  setChildren: (children: number | null) => void
+  setGrandchildren: (grandchildren: number | null) => void
   updateContext: (context: Partial<UserContext>) => void
   reset: () => void
 }
@@ -51,14 +48,14 @@ const useUserStore = create<UserStore>()(
           context: { ...state.context, region },
         })),
 
-      setHasChildren: (hasChildren) =>
+      setChildren: (children) =>
         set((state) => ({
-          context: { ...state.context, has_children: hasChildren },
+          context: { ...state.context, children },
         })),
 
-      setHasGrandchildren: (hasGrandchildren) =>
+      setGrandchildren: (grandchildren) =>
         set((state) => ({
-          context: { ...state.context, has_grandchildren: hasGrandchildren },
+          context: { ...state.context, grandchildren },
         })),
 
       updateContext: (context) =>
@@ -80,4 +77,4 @@ const useUserStore = create<UserStore>()(
 )
 
 export { useUserStore }
-export type { UserState, UserActions, AgeGroup, Region }
+export type { UserState, UserActions }

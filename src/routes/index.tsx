@@ -37,7 +37,7 @@ function HomePage() {
     context,
     setAgeGroup,
     setRegion,
-    setHasChildren,
+    setChildren,
   } = useUserStore()
   const {
     selectedScenario,
@@ -178,8 +178,8 @@ function HomePage() {
             <div className="flex items-center gap-3">
               <label className="w-20 text-sm text-gray-600">자녀 유무</label>
               <select
-                value={context.has_children === true ? 'true' : 'false'}
-                onChange={(e) => setHasChildren(e.target.value === 'true')}
+                value={(context.children ?? 0) > 0 ? 'true' : 'false'}
+                onChange={(e) => setChildren(e.target.value === 'true' ? 1 : null)}
                 className="flex-1 p-2 border border-gray-200 rounded-lg bg-white"
               >
                 {CHILDREN_OPTIONS.map((opt) => (

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { UserContext } from '@/types/database'
+import type { UserContext, AgeGroup, Region } from '@/types/database'
 import { AGE_GROUP_LABELS, REGION_LABELS } from '@/lib/scenarios'
 
 interface ContextFormProps {
@@ -7,9 +7,6 @@ interface ContextFormProps {
   onSubmit: (context: UserContext) => void
   onCancel: () => void
 }
-
-type AgeGroup = 'under50' | '50s' | '60s' | '70plus'
-type Region = 'seoul' | 'gyeonggi' | 'other'
 
 function ContextForm({ initialContext, onSubmit, onCancel }: ContextFormProps) {
   const [context, setContext] = useState<UserContext>(initialContext)
@@ -73,9 +70,9 @@ function ContextForm({ initialContext, onSubmit, onCancel }: ContextFormProps) {
           <label className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 cursor-pointer hover:border-gray-300">
             <input
               type="checkbox"
-              checked={context.has_children ?? false}
+              checked={(context.children ?? 0) > 0}
               onChange={(e) =>
-                setContext({ ...context, has_children: e.target.checked })
+                setContext({ ...context, children: e.target.checked ? 1 : null })
               }
               className="w-5 h-5 rounded border-gray-300 text-blue-500 focus:ring-blue-500"
             />
@@ -84,9 +81,9 @@ function ContextForm({ initialContext, onSubmit, onCancel }: ContextFormProps) {
           <label className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 cursor-pointer hover:border-gray-300">
             <input
               type="checkbox"
-              checked={context.has_grandchildren ?? false}
+              checked={(context.grandchildren ?? 0) > 0}
               onChange={(e) =>
-                setContext({ ...context, has_grandchildren: e.target.checked })
+                setContext({ ...context, grandchildren: e.target.checked ? 1 : null })
               }
               className="w-5 h-5 rounded border-gray-300 text-blue-500 focus:ring-blue-500"
             />
