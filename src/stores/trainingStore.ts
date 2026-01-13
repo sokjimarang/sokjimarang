@@ -23,7 +23,7 @@ interface TrainingState {
   status: TrainingStatus
   currentSession: TrainingSession | null
   transcripts: TranscriptMessage[]
-  vapiCallId: string | null
+  conversationId: string | null
   callDuration: number
   isAiSpeaking: boolean
   selectedScenario: ScenarioType | 'random'
@@ -36,7 +36,7 @@ interface TrainingActions {
   setSelectedPresetId: (presetId: string | null) => void
   startTraining: (scenarioType: ScenarioType) => void
   setSession: (session: TrainingSession) => void
-  setVapiCallId: (callId: string) => void
+  setConversationId: (conversationId: string) => void
   addTranscript: (message: TranscriptMessage) => void
   setAiSpeaking: (speaking: boolean) => void
   updateCallDuration: (seconds: number) => void
@@ -52,7 +52,7 @@ const initialState: TrainingState = {
   status: 'idle',
   currentSession: null,
   transcripts: [],
-  vapiCallId: null,
+  conversationId: null,
   callDuration: 0,
   isAiSpeaking: false,
   selectedScenario: 'random',
@@ -83,7 +83,7 @@ const useTrainingStore = create<TrainingStore>()(
             reached_stage: 0,
             termination_reason: null,
             duration_seconds: null,
-            vapi_call_id: null,
+            conversation_id: null,
             user_context: {},
           },
           transcripts: [],
@@ -96,11 +96,11 @@ const useTrainingStore = create<TrainingStore>()(
           status: 'in_call',
         }),
 
-      setVapiCallId: (callId) =>
+      setConversationId: (conversationId) =>
         set((state) => ({
-          vapiCallId: callId,
+          conversationId,
           currentSession: state.currentSession
-            ? { ...state.currentSession, vapi_call_id: callId }
+            ? { ...state.currentSession, conversation_id: conversationId }
             : null,
         })),
 

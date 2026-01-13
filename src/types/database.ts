@@ -21,7 +21,7 @@ export interface TrainingSession {
   reached_stage: number
   termination_reason: string | null
   duration_seconds: number | null
-  vapi_call_id: string | null
+  conversation_id: string | null
   user_context: UserContext
 }
 
