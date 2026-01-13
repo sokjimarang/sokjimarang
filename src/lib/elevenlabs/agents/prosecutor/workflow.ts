@@ -3,7 +3,7 @@
  * 검찰 사칭형 보이스피싱 시뮬레이션 워크플로우 정의
  *
  * 노드 구조:
- * - start (1개)
+ * - start_node (1개) - 주의: ElevenLabs API에서 "start"는 예약어이므로 다른 이름 사용
  * - stage 노드 (5개): stage1_contact ~ stage5_transfer
  * - persuade 노드 (5개): persuade1_soft ~ persuade5_final
  * - end 노드 (3개): end_rejected, end_suspected, end_fooled
@@ -11,22 +11,23 @@
  * 분기 조건: LLM Condition (자연어 기반)
  */
 
-import type { WorkflowNode, WorkflowEdge } from '../../types'
+import type { StartNode, OverrideAgentNode, EndNode, WorkflowEdge } from '../../types'
 import { STAGE_PROMPTS } from './prompts/stages'
 import { PERSUADE_PROMPTS } from './prompts/persuades'
-import { END_PROMPTS } from './prompts/endings'
 
 // ============================================
 // 노드 정의 (14개)
 // ============================================
 
-export const workflowNodes: Record<string, WorkflowNode> = {
-  // 시작 노드
-  start: {
-    type: 'start',
-    position: { x: 0, y: 300 },
-    edge_order: ['start_to_stage1'],
-  },
+// Start 노드 - "start"는 ElevenLabs 예약어이므로 "start_node" 사용
+const startNode: StartNode = {
+  type: 'start',
+  position: { x: 0, y: 300 },
+  edge_order: ['start_node_to_stage1'],
+}
+
+// Stage & Persuade 노드들
+const agentNodes: Record<string, OverrideAgentNode> = {
 
   // Stage 노드들 (5개)
   stage1_contact: {
@@ -101,29 +102,29 @@ export const workflowNodes: Record<string, WorkflowNode> = {
     additional_prompt: PERSUADE_PROMPTS.persuade5_final,
     edge_order: ['persuade5_to_fooled', 'persuade5_to_suspected'],
   },
+}
 
-  // End 노드들 (3개)
+// End 노드들 (3개) - end 타입은 edge_order, additional_prompt 없음
+const endNodes: Record<string, EndNode> = {
   end_rejected: {
     type: 'end',
-    label: '거부로 종료',
     position: { x: 1200, y: 500 },
-    additional_prompt: END_PROMPTS.end_rejected,
-    edge_order: [],
   },
   end_suspected: {
     type: 'end',
-    label: '의심 유지로 종료',
     position: { x: 1200, y: 100 },
-    additional_prompt: END_PROMPTS.end_suspected,
-    edge_order: [],
   },
   end_fooled: {
     type: 'end',
-    label: '완전히 속음',
     position: { x: 1200, y: 300 },
-    additional_prompt: END_PROMPTS.end_fooled,
-    edge_order: [],
   },
+}
+
+// 통합 노드 객체
+export const workflowNodes = {
+  start_node: startNode,
+  ...agentNodes,
+  ...endNodes,
 }
 
 // ============================================
@@ -131,13 +132,12 @@ export const workflowNodes: Record<string, WorkflowNode> = {
 // ============================================
 
 export const workflowEdges: Record<string, WorkflowEdge> = {
-  // Start → Stage1
-  start_to_stage1: {
-    source: 'start',
+  // Start → Stage1 (무조건 진행)
+  start_node_to_stage1: {
+    source: 'start_node',
     target: 'stage1_contact',
     forward_condition: {
-      type: 'llm',
-      condition: '대화 시작',
+      type: 'unconditional',
     },
   },
 

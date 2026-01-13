@@ -31,6 +31,7 @@ export const prosecutorConversationConfig: ConversationConfig = {
 
   agent: {
     prompt: {
+      llm: 'gpt-4o-mini',
       prompt: BASE_SYSTEM_PROMPT,
     },
     first_message: FIRST_MESSAGE,

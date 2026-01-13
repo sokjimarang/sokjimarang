@@ -1,16 +1,31 @@
-export type NodeType = 'start' | 'override_agent' | 'end'
-
 export interface Position {
   x: number
   y: number
 }
 
-export interface WorkflowNode {
-  type: NodeType
+export interface StartNode {
+  type: 'start'
+  position: Position
+  edge_order: string[]
+}
+
+export interface OverrideAgentNode {
+  type: 'override_agent'
   label?: string
   position: Position
-  additional_prompt?: string
   edge_order: string[]
+  additional_prompt?: string
+}
+
+export interface EndNode {
+  type: 'end'
+  position: Position
+}
+
+export type WorkflowNode = StartNode | OverrideAgentNode | EndNode
+
+export interface UnconditionalCondition {
+  type: 'unconditional'
 }
 
 export interface LLMCondition {
@@ -18,10 +33,12 @@ export interface LLMCondition {
   condition: string
 }
 
+export type ForwardCondition = UnconditionalCondition | LLMCondition
+
 export interface WorkflowEdge {
   source: string
   target: string
-  forward_condition: LLMCondition
+  forward_condition: ForwardCondition
 }
 
 export interface TtsConfig {
@@ -44,6 +61,7 @@ export interface LlmConfig {
 
 export interface AgentConfig {
   prompt: {
+    llm: string
     prompt: string
   }
   first_message?: string
