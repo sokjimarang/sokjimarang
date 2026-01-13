@@ -15,11 +15,10 @@ const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL
 
 interface UseVapiCallOptions {
   scenarioType: ScenarioType
-  announceTraining?: boolean
   onCallEnd?: () => void
 }
 
-function useVapiCall({ scenarioType, announceTraining, onCallEnd }: UseVapiCallOptions) {
+function useVapiCall({ scenarioType, onCallEnd }: UseVapiCallOptions) {
   const vapiRef = useRef<Vapi | null>(null)
   const timerRef = useRef<number | null>(null)
   const durationRef = useRef(0)
@@ -139,10 +138,7 @@ function useVapiCall({ scenarioType, announceTraining, onCallEnd }: UseVapiCallO
         setIsConnected(false)
       })
 
-      // If announceTraining is enabled, prepend the training announcement
-      const firstMessage = announceTraining
-        ? `안내드립니다. 이것은 보이스피싱 훈련입니다. 훈련이 시작됩니다. ${scenario.promptConfig.firstMessage}`
-        : scenario.promptConfig.firstMessage
+      const firstMessage = scenario.promptConfig.firstMessage
 
       const call = await vapi.start({
         model: {
@@ -175,7 +171,6 @@ function useVapiCall({ scenarioType, announceTraining, onCallEnd }: UseVapiCallO
     }
   }, [
     scenario,
-    announceTraining,
     createSession,
     setSession,
     setVapiCallId,

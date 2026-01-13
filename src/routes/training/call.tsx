@@ -1,29 +1,26 @@
 import { useEffect, useRef } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
+
 import { useTrainingStore } from '@/stores'
 import { useVapiCall } from '@/hooks/useVapiCall'
 import { getScenarioMetadata } from '@/lib/scenarios'
 import { formatTime } from '@/lib/time'
-import type { ScenarioType } from '@/types/database'
 import { useOverlay, ConfirmModal } from '@/components/ui/overlay'
 
 function CallPage() {
   const navigate = useNavigate()
-  const [searchParams] = useSearchParams()
   const { open } = useOverlay()
   const hasStartedRef = useRef(false)
 
-  const scenarioType = searchParams.get('scenario') as ScenarioType
-  const announceTraining = searchParams.get('announce') === '1'
+  const { currentSession, callDuration, isAiSpeaking, status } = useTrainingStore()
+
+  const scenarioType = currentSession?.scenario_type
   const scenario = scenarioType ? getScenarioMetadata(scenarioType) : null
 
-  const { callDuration, isAiSpeaking, status } = useTrainingStore()
-
   const { isConnecting, isConnected, error, startCall, endCall } = useVapiCall({
-    scenarioType,
-    announceTraining,
+    scenarioType: scenarioType!,
     onCallEnd: () => {
-      navigate(`/training/debrief?scenario=${scenarioType}`)
+      navigate('/training/debrief')
     },
   })
 
@@ -33,7 +30,6 @@ function CallPage() {
     }
   }, [scenarioType, scenario, navigate])
 
-  // Auto-start call on mount
   useEffect(() => {
     if (scenarioType && scenario && !hasStartedRef.current) {
       hasStartedRef.current = true
@@ -43,9 +39,9 @@ function CallPage() {
 
   useEffect(() => {
     if (status === 'debriefing') {
-      navigate(`/training/debrief?scenario=${scenarioType}`)
+      navigate('/training/debrief')
     }
-  }, [status, scenarioType, navigate])
+  }, [status, navigate])
 
   const handleEndCall = async () => {
     const confirmed = await open<boolean>(({ close }) => (
@@ -69,10 +65,8 @@ function CallPage() {
   return (
     <div className="min-h-screen bg-gray-900 text-white flex flex-col items-center justify-center">
       <main className="flex-1 flex flex-col items-center justify-center gap-8">
-        {/* Phone Icon */}
         <div className="text-7xl">📞</div>
 
-        {/* Status and Timer */}
         <div className="text-center">
           <p className="text-2xl font-medium mb-2">
             {isConnecting ? '연결 중...' : isConnected ? '통화 중' : '준비 중'}
@@ -80,7 +74,6 @@ function CallPage() {
           <p className="text-4xl font-mono">{formatTime(callDuration)}</p>
         </div>
 
-        {/* Audio Level Visualization */}
         <div className="flex items-center justify-center gap-1 h-8">
           {Array.from({ length: 12 }).map((_, i) => (
             <div
@@ -100,13 +93,11 @@ function CallPage() {
           ))}
         </div>
 
-        {/* Error Message */}
         {error && (
           <p className="text-red-400 text-sm text-center">{error}</p>
         )}
       </main>
 
-      {/* End Button */}
       <footer className="p-8">
         <button
           onClick={handleEndCall}
