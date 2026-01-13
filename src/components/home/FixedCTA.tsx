@@ -26,7 +26,7 @@ function FixedCTA({ selectedPresetId, selectedScenario }: FixedCTAProps) {
   }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+    <div className="flex-shrink-0 bg-white border-t border-gray-200 p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
       <button
         type="button"
         onClick={handleClick}
