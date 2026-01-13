@@ -11,7 +11,7 @@ test.describe('온보딩 플로우', () => {
     await expect(page).toHaveURL(/onboarding/)
   })
 
-  test('온보딩 4페이지 네비게이션', async ({ page }) => {
+  test('온보딩 3개 슬라이드 + 동의 화면 네비게이션', async ({ page }) => {
     await page.goto('/onboarding')
 
     // 페이지 1: 보이스피싱 설명
