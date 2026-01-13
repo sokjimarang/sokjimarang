@@ -36,7 +36,7 @@ function useElevenLabsCall({ scenarioType, onCallEnd }: UseElevenLabsCallOptions
   const { context } = useUserStore()
   const {
     setSession,
-    setVapiCallId,
+    setConversationId,
     addTranscript,
     setAiSpeaking,
     updateCallDuration,
@@ -165,7 +165,7 @@ function useElevenLabsCall({ scenarioType, onCallEnd }: UseElevenLabsCallOptions
       conversationRef.current = conversation
 
       if (session?.id) {
-        setVapiCallId(session.id)
+        setConversationId(session.id)
       }
     } catch (err) {
       console.error('Failed to start call:', err)
@@ -176,7 +176,7 @@ function useElevenLabsCall({ scenarioType, onCallEnd }: UseElevenLabsCallOptions
     context,
     createSession,
     setSession,
-    setVapiCallId,
+    setConversationId,
     addTranscript,
     setAiSpeaking,
     updateCallDuration,
