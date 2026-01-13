@@ -36,7 +36,7 @@ test.describe('온보딩 플로우', () => {
     await expect(page.getByText('다음에 동의해주세요')).toBeVisible()
   })
 
-  test('동의 체크박스 3개 모두 선택 시 시작 버튼 활성화', async ({ page }) => {
+  test('동의 체크박스 4개 확인 (모두 동의 + 개별 3개)', async ({ page }) => {
     await page.goto('/onboarding')
 
     // 페이지 4로 이동
@@ -44,17 +44,58 @@ test.describe('온보딩 플로우', () => {
       await page.getByRole('button', { name: '다음' }).click()
     }
 
-    // 체크박스 3개 확인
+    // 체크박스 4개 확인 (모두 동의 1개 + 개별 3개)
     const checkboxes = page.getByRole('checkbox')
-    await expect(checkboxes).toHaveCount(3)
+    await expect(checkboxes).toHaveCount(4)
+
+    // 모두 동의 라벨 확인
+    await expect(page.getByText('모두 동의')).toBeVisible()
+
+    // 시작 버튼 비활성화 상태 확인
+    const startButton = page.getByRole('button', { name: '동의하고 시작' })
+    await expect(startButton).toBeDisabled()
+  })
+
+  test('모두 동의 체크 시 전체 선택 및 시작 버튼 활성화', async ({ page }) => {
+    await page.goto('/onboarding')
+
+    // 페이지 4로 이동
+    for (let i = 0; i < 3; i++) {
+      await page.getByRole('button', { name: '다음' }).click()
+    }
+
+    // 모두 동의 체크박스 클릭
+    const agreeAllCheckbox = page.getByRole('checkbox').first()
+    await agreeAllCheckbox.check()
+
+    // 모든 체크박스가 선택되었는지 확인
+    const checkboxes = page.getByRole('checkbox')
+    for (const checkbox of await checkboxes.all()) {
+      await expect(checkbox).toBeChecked()
+    }
+
+    // 시작 버튼 활성화 확인
+    const startButton = page.getByRole('button', { name: '동의하고 시작' })
+    await expect(startButton).toBeEnabled()
+  })
+
+  test('개별 동의 체크박스 선택으로 시작 버튼 활성화', async ({ page }) => {
+    await page.goto('/onboarding')
+
+    // 페이지 4로 이동
+    for (let i = 0; i < 3; i++) {
+      await page.getByRole('button', { name: '다음' }).click()
+    }
 
     // 시작 버튼 비활성화 상태 확인
     const startButton = page.getByRole('button', { name: '동의하고 시작' })
     await expect(startButton).toBeDisabled()
 
-    // 모든 체크박스 선택
-    for (const checkbox of await checkboxes.all()) {
-      await checkbox.check()
+    // 개별 체크박스 3개만 선택 (모두 동의 제외)
+    const checkboxes = page.getByRole('checkbox')
+    const allCheckboxes = await checkboxes.all()
+    for (let i = 1; i < allCheckboxes.length; i++) {
+      await allCheckboxes[i].check()
     }
 
     // 시작 버튼 활성화 확인
@@ -83,11 +124,9 @@ test.describe('온보딩 플로우', () => {
       await page.getByRole('button', { name: '다음' }).click()
     }
 
-    // 모든 체크박스 선택
-    const checkboxes = page.getByRole('checkbox')
-    for (const checkbox of await checkboxes.all()) {
-      await checkbox.check()
-    }
+    // 모두 동의 체크박스로 전체 선택
+    const agreeAllCheckbox = page.getByRole('checkbox').first()
+    await agreeAllCheckbox.check()
 
     // 시작 버튼 클릭
     await page.getByRole('button', { name: '동의하고 시작' }).click()
