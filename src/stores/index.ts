@@ -7,4 +7,4 @@ export type {
 } from './trainingStore'
 
 export { useUserStore } from './userStore'
-export type { UserState, UserActions, AgeGroup, Region } from './userStore'
+export type { UserState, UserActions } from './userStore'

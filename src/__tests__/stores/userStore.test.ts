@@ -44,11 +44,27 @@ describe('userStore', () => {
     expect(context.region).toBe('gyeonggi')
   })
 
-  it('setHasChildren으로 자녀 유무 설정이 동작해야 함', () => {
-    const { setHasChildren } = useUserStore.getState()
-    setHasChildren(true)
+  it('setChildren으로 자녀 수 설정이 동작해야 함', () => {
+    const { setChildren } = useUserStore.getState()
+    setChildren(2)
 
     const { context } = useUserStore.getState()
-    expect(context.has_children).toBe(true)
+    expect(context.children).toBe(2)
+  })
+
+  it('setGrandchildren으로 손주 수 설정이 동작해야 함', () => {
+    const { setGrandchildren } = useUserStore.getState()
+    setGrandchildren(1)
+
+    const { context } = useUserStore.getState()
+    expect(context.grandchildren).toBe(1)
+  })
+
+  it('setChildren에 null 설정 시 자녀 없음 처리', () => {
+    const { setChildren } = useUserStore.getState()
+    setChildren(null)
+
+    const { context } = useUserStore.getState()
+    expect(context.children).toBeNull()
   })
 })
