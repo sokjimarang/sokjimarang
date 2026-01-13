@@ -59,6 +59,15 @@ function OnboardingPage() {
     setConsents((prev) => ({ ...prev, [id]: !prev[id] }))
   }
 
+  const handleAgreeAll = () => {
+    const newValue = !allConsentsAgreed
+    setConsents({
+      terms: newValue,
+      privacy: newValue,
+      recording: newValue,
+    })
+  }
+
   const handleStart = () => {
     agreeToTerms()
     completeOnboarding()
@@ -113,6 +122,17 @@ function OnboardingPage() {
             <p className="text-gray-600 text-center mb-8">
               다음에 동의해주세요
             </p>
+
+            {/* 모두 동의 */}
+            <label className="flex items-center gap-3 p-4 bg-blue-50 rounded-xl border-2 border-blue-200 cursor-pointer hover:border-blue-300 transition-colors mb-4">
+              <input
+                type="checkbox"
+                checked={allConsentsAgreed}
+                onChange={handleAgreeAll}
+                className="w-5 h-5 rounded border-gray-300 text-blue-500 focus:ring-blue-500"
+              />
+              <span className="text-gray-900 font-semibold">모두 동의</span>
+            </label>
 
             <div className="space-y-4">
               {CONSENT_ITEMS.map((item) => (
