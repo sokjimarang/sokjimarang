@@ -31,10 +31,10 @@
 ### 2.1 기본 설정
 | 항목 | 값 | 비고 |
 |------|-----|------|
-| agent_id | `[생성 후 기록]` | 환경변수: `VITE_ELEVENLABS_AGENT_ID` |
-| LLM | Gemini 2.0 Flash (기본값) | ElevenLabs 기본 모델 |
+| agent_id | `agent_8701kevwbv8sf8c9f24ky04nd2qm` | 환경변수: `VITE_ELEVENLABS_AGENT_ID` |
+| LLM | `gpt-4o-mini` | conversation_config에 명시 필요 |
 | Voice | `nPczCjzI2devNBz1zQrb` | Brian (영어/한국어 지원) |
-| TTS Model | `eleven_turbo_v2_5` | 저지연 모델 |
+| TTS Model | `eleven_turbo_v2_5` | 한국어 필수 (turbo/flash v2_5만 지원) |
 | ASR | `elevenlabs` + `ko` | 한국어 음성 인식 |
 
 ### 2.2 conversation_config
@@ -50,12 +50,19 @@
     language: 'ko',
   },
   agent: {
-    prompt: { prompt: BASE_SYSTEM_PROMPT },
+    prompt: {
+      llm: 'gpt-4o-mini',       // ⚠️ 필수 필드
+      prompt: BASE_SYSTEM_PROMPT,
+    },
     first_message: FIRST_MESSAGE,
     language: 'ko',
   },
 }
 ```
+
+> **⚠️ 주의사항**
+> - `agent.prompt.llm` 필드는 **필수**입니다. 누락 시 API 에러 발생
+> - 한국어 에이전트는 `eleven_turbo_v2_5` 또는 `eleven_flash_v2_5` TTS 모델만 지원
 
 ---
 
@@ -63,10 +70,13 @@
 
 ### 3.1 노드 다이어그램
 
+> **⚠️ 중요**: 노드 ID로 `"start"`는 사용 불가 (ElevenLabs API 예약어)
+> 반드시 `"start_node"` 등 다른 이름 사용
+
 ```
-┌─────────┐
-│  start  │
-└────┬────┘
+┌────────────┐
+│ start_node │
+└─────┬──────┘
      │
      ▼
 ┌────────────────┐    의심     ┌────────────────┐
@@ -109,7 +119,7 @@
 
 | 노드 | 타입 | 역할 |
 |------|------|------|
-| `start` | start | 대화 시작점 |
+| `start_node` | start | 대화 시작점 (⚠️ "start" ID 사용 불가) |
 | `stage1_contact` | override_agent | 접촉 및 신뢰 구축 |
 | `stage2_fear` | override_agent | 공포 유발 |
 | `stage3_isolate` | override_agent | 고립 유도 |
@@ -319,9 +329,9 @@ const conversation = await startConversationWithContext({
 ## 9. 테스트 체크리스트
 
 ### 9.1 에이전트 생성
-- [ ] Edge Function `elevenlabs-create-agent` 호출 성공
-- [ ] agent_id 반환 확인
-- [ ] ElevenLabs 대시보드에서 에이전트 확인
+- [x] 스크립트 `pnpm tsx scripts/create-elevenlabs-agent.ts` 실행 성공
+- [x] agent_id 반환 확인: `agent_8701kevwbv8sf8c9f24ky04nd2qm`
+- [x] ElevenLabs 대시보드에서 에이전트 확인
 
 ### 9.2 대화 연결
 - [ ] Signed URL 발급 성공
@@ -346,7 +356,57 @@ const conversation = await startConversationWithContext({
 
 ---
 
-## 10. 참고 자료
+## 10. API 에러 해결 가이드
+
+### 10.1 "Workflow must contain a start node" (422)
+
+**원인**: 노드 ID로 `"start"`를 사용함
+
+**해결**: 노드 ID를 `"start_node"` 등 다른 이름으로 변경
+
+```typescript
+// ❌ 잘못된 예
+nodes: {
+  start: { type: 'start', ... }
+}
+
+// ✅ 올바른 예
+nodes: {
+  start_node: { type: 'start', ... }
+}
+```
+
+### 10.2 "Non-english Agents must use turbo or flash v2_5" (400)
+
+**원인**: 한국어 에이전트에 `eleven_turbo_v2` 등 구버전 TTS 모델 사용
+
+**해결**: `model_id`를 `eleven_turbo_v2_5` 또는 `eleven_flash_v2_5`로 변경
+
+```typescript
+tts: {
+  voice_id: 'nPczCjzI2devNBz1zQrb',
+  model_id: 'eleven_turbo_v2_5',  // ✅ v2_5 필수
+}
+```
+
+### 10.3 "llm field required" 또는 validation error
+
+**원인**: `conversation_config.agent.prompt`에 `llm` 필드 누락
+
+**해결**: `llm` 필드 추가
+
+```typescript
+agent: {
+  prompt: {
+    llm: 'gpt-4o-mini',  // ✅ 필수
+    prompt: BASE_SYSTEM_PROMPT,
+  },
+}
+```
+
+---
+
+## 11. 참고 자료
 
 - [ElevenLabs Create Agent API](https://elevenlabs.io/docs/api-reference/agents/create)
 - [ElevenLabs TypeScript SDK](https://elevenlabs.io/docs/agents-platform/libraries/java-script)
