@@ -1,7 +1,7 @@
 # Current Task
 
 ## Context
-sokjimarang-temp Next.js 16 프로젝트 (Vapi AI, OpenAI 통합)
+기술 스택은 `docs/tech-stack.md` 파일을 참고하세요.
 
 ## Task Description
 [작업 설명을 여기에 작성]
