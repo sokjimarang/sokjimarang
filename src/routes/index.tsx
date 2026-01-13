@@ -36,9 +36,9 @@ function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-24">
+    <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
       {/* 헤더 */}
-      <header className="bg-white border-b border-gray-200 px-4 py-4 flex justify-between items-center">
+      <header className="flex-shrink-0 bg-white border-b border-gray-200 px-4 py-4 flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">속지마랑</h1>
           <p className="text-sm text-gray-500">보이스피싱 예방 훈련</p>
@@ -52,7 +52,8 @@ function HomePage() {
         </button>
       </header>
 
-      <main>
+      {/* 메인 콘텐츠 */}
+      <main className="flex-1 overflow-hidden">
         <PresetCarousel
           selectedPresetId={selectedPresetId}
           onSelectPreset={handlePresetSelect}
@@ -64,6 +65,7 @@ function HomePage() {
         />
       </main>
 
+      {/* 하단 CTA */}
       <FixedCTA
         selectedPresetId={selectedPresetId}
         selectedScenario={selectedScenario}
