@@ -41,10 +41,17 @@ export interface WorkflowEdge {
   forward_condition: ForwardCondition
 }
 
+export interface VoiceSettings {
+  speed?: number
+  stability?: number
+  similarity_boost?: number
+}
+
 export interface TtsConfig {
   voice_id: string
   model_id?: string
   optimize_streaming_latency?: number
+  voice_settings?: VoiceSettings
 }
 
 export interface AsrConfig {
