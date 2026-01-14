@@ -154,6 +154,8 @@ function useElevenLabsCall({ scenarioType, onCallEnd }: UseElevenLabsCallOptions
 
           if (speaker === 'ai' && hasEndScenarioTag(message.message)) {
             const scenarioData = parseEndScenarioTag(message.message)
+            console.log('[END_SCENARIO] Raw message:', message.message)
+            console.log('[END_SCENARIO] Parsed data:', scenarioData)
             setTimeout(() => {
               handleEndConversation('scenario_completed', scenarioData ?? undefined)
             }, END_SCENARIO_DELAY_MS)

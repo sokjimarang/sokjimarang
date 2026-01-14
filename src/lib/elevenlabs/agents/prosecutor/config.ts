@@ -22,6 +22,9 @@ export const prosecutorConversationConfig: ConversationConfig = {
     voice_id: KOREAN_MALE_VOICE_ID,
     model_id: 'eleven_turbo_v2_5',
     optimize_streaming_latency: 3,
+    voice_settings: {
+      speed: 1.2,
+    },
   },
 
   asr: {
