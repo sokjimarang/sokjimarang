@@ -156,15 +156,49 @@ Some chunks are larger than 500 kB after minification
 
 ## 환경 설정
 
-### Vapi 연결 실패
+### ElevenLabs 연결 실패
 
 **원인:**
-- VITE_VAPI_PUBLIC_KEY 미설정
+- VITE_ELEVENLABS_AGENT_ID 미설정
 - VITE_SUPABASE_URL 미설정
+- Signed URL 발급 실패
 
 **확인:**
 1. `.env.local` 파일에 환경변수 설정 확인
-2. 브라우저 개발자 도구에서 네트워크 요청 확인
+2. 브라우저 개발자 도구 > Network 탭에서 `elevenlabs-get-signed-url` 요청 확인
+3. ElevenLabs 대시보드에서 Agent 상태 확인 (Error 상태 아닌지)
+
+**해결:**
+1. `pnpm agent:update`로 에이전트 설정 동기화
+2. Supabase Edge Function 로그 확인
+
+### ElevenLabs Agent Error 상태
+
+**증상:**
+ElevenLabs 대시보드에서 Agent가 "Error" 상태로 표시됨
+
+**원인:**
+- 프롬프트 설정 오류
+- Conversation Config 유효성 검사 실패
+
+**해결:**
+```bash
+# 로컬 설정으로 에이전트 업데이트
+pnpm agent:update
+```
+
+### ElevenLabs 음성 지연
+
+**증상:**
+AI 응답이 너무 느림 (300ms 이상)
+
+**확인:**
+1. 네트워크 연결 상태 확인
+2. WebRTC 연결 여부 확인 (WebSocket보다 빠름)
+
+**최적화:**
+- `connectionType: "webrtc"` 사용 권장
+- [지연시간 최적화 가이드](https://elevenlabs.io/docs/best-practices/latency-optimization) 참고
 
 ### Web Speech API 미지원
 
