@@ -31,6 +31,11 @@ interface TrainingState {
   sessions: TrainingHistory[]
 }
 
+interface EndScenarioPayload {
+  reached_stage: number
+  termination_reason: string
+}
+
 interface TrainingActions {
   setSelectedScenario: (scenario: ScenarioType | 'random') => void
   setSelectedPresetId: (presetId: string | null) => void
@@ -41,6 +46,7 @@ interface TrainingActions {
   setAiSpeaking: (speaking: boolean) => void
   updateCallDuration: (seconds: number) => void
   endTraining: (reason: string) => void
+  endTrainingWithData: (data: EndScenarioPayload) => void
   goToDebriefing: () => void
   saveSession: () => void
   reset: () => void
@@ -123,6 +129,20 @@ const useTrainingStore = create<TrainingStore>()(
                 ...state.currentSession,
                 ended_at: new Date().toISOString(),
                 termination_reason: reason,
+                duration_seconds: state.callDuration,
+              }
+            : null,
+        })),
+
+      endTrainingWithData: (data) =>
+        set((state) => ({
+          status: 'debriefing',
+          currentSession: state.currentSession
+            ? {
+                ...state.currentSession,
+                ended_at: new Date().toISOString(),
+                reached_stage: data.reached_stage,
+                termination_reason: data.termination_reason,
                 duration_seconds: state.callDuration,
               }
             : null,

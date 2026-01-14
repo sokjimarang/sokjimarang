@@ -20,13 +20,10 @@ export const END_REJECTED_PROMPT = `# 종료 상황: 사용자가 거부함
 "참고로, 이번 훈련에서 말씀하신 내용은 저장되지 않으니 안심하세요."
 "실제 상황에서도 절대로 주민번호, 계좌번호 같은 개인정보를 알려주시면 안 됩니다."
 
-4. [마무리]
+4. [마무리 - 종료 태그 필수]
 "화면에서 자세한 분석 결과를 확인하실 수 있습니다."
-[종료]
-
-## 데이터 전달
-- termination_reason: "user_rejected"
-- user_suspicious_point: "거부"`
+마지막 발화 직후 반드시 종료 태그를 출력하세요: [END_SCENARIO:{"reached_stage":현재_진행_단계,"termination_reason":"user_rejected"}]
+현재_진행_단계는 이 노드로 오기 전 마지막으로 진행한 Stage 번호(1~5)입니다.`
 
 /** End: 사용자가 의심을 유지함 */
 export const END_SUSPECTED_PROMPT = `# 종료 상황: 사용자가 의심을 유지함
@@ -46,12 +43,10 @@ export const END_SUSPECTED_PROMPT = `# 종료 상황: 사용자가 의심을 유
 "참고로, 이번 훈련에서 말씀하신 내용은 저장되지 않으니 안심하세요."
 "실제 상황에서도 절대로 주민번호, 계좌번호 같은 개인정보를 알려주시면 안 됩니다."
 
-4. [마무리]
+4. [마무리 - 종료 태그 필수]
 "화면에서 자세한 분석 결과를 확인하실 수 있습니다."
-[종료]
-
-## 데이터 전달
-- termination_reason: "user_suspected"`
+마지막 발화 직후 반드시 종료 태그를 출력하세요: [END_SCENARIO:{"reached_stage":현재_진행_단계,"termination_reason":"user_suspected"}]
+현재_진행_단계는 이 노드로 오기 전 마지막으로 진행한 Stage 번호(1~5)입니다.`
 
 /** End: 사용자가 끝까지 속음 */
 export const END_FOOLED_PROMPT = `# 종료 상황: 사용자가 끝까지 속음
@@ -80,14 +75,9 @@ export const END_FOOLED_PROMPT = `# 종료 상황: 사용자가 끝까지 속음
 "이번 훈련에서 말씀하신 내용은 저장되지 않으니 안심하세요."
 "실제 상황에서는 절대로 주민번호, 계좌번호, 비밀번호 같은 개인정보를 알려주시면 안 됩니다."
 
-5. [마무리]
+5. [마무리 - 종료 태그 필수]
 "화면에서 자세한 분석 결과를 확인하실 수 있습니다."
-[종료]
-
-## 데이터 전달
-- termination_reason: "user_fooled"
-- reached_stage: 5
-- warning_delivered: true`
+마지막 발화 직후 반드시 종료 태그를 출력하세요: [END_SCENARIO:{"reached_stage":5,"termination_reason":"user_fooled"}]`
 
 export const END_PROMPTS = {
   end_rejected: END_REJECTED_PROMPT,

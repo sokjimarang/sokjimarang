@@ -33,6 +33,8 @@ export type {
   DetectionPoint,
   CorrectResponse,
   TerminationReason,
+  ScenarioTerminationReason,
+  EndScenarioData,
 } from './types'
 export { TERMINATION_KEYWORDS } from './types'
 
@@ -41,6 +43,7 @@ export { injectContext, getHonorific, AGE_GROUP_LABELS, REGION_LABELS } from './
 export {
   detectTermination,
   hasEndScenarioTag,
+  parseEndScenarioTag,
   removeEndScenarioTag,
 } from './terminationDetector'
 export type { TerminationResult } from './terminationDetector'
