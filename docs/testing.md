@@ -44,34 +44,22 @@ sokjimarang-2/
 └── src/
     └── __tests__/
         ├── setup/
-        │   └── msw-handlers.ts # MSW 핸들러 정의
-        ├── api/
-        │   ├── custom-llm.test.ts      # Custom LLM API 테스트
-        │   └── vapi-webhook.test.ts    # Vapi Webhook 테스트
-        ├── config/
-        │   └── env.test.ts             # 환경변수 검증 테스트
+        │   └── msw-handlers.ts    # MSW 핸들러 정의
+        ├── stores/
+        │   └── userStore.test.ts  # Zustand 스토어 테스트
         └── lib/
-            └── gemini/
-                └── client.test.ts      # Gemini 클라이언트 테스트
+            └── scenarios/         # 시나리오 관련 테스트
 ```
 
 ---
 
 ## 테스트 현황
 
-### API 테스트
-
-| 테스트 파일 | 테스트 케이스 | 설명 |
-|------------|--------------|------|
-| `custom-llm.test.ts` | 6개 (+ 1 skip) | LLM 응답, SSE 스트리밍, 에러 처리 |
-| `vapi-webhook.test.ts` | 6개 | 이벤트 타입별 처리 (status-update, transcript 등) |
-
-### 유닛 테스트
-
-| 테스트 파일 | 테스트 케이스 | 설명 |
-|------------|--------------|------|
-| `env.test.ts` | 4개 | Zod 환경변수 검증 |
-| `client.test.ts` | 3개 | Gemini 클라이언트 팩토리 |
+| 테스트 파일 | 설명 |
+|------------|------|
+| `stores/*.test.ts` | Zustand 스토어 테스트 |
+| `lib/scenarios/*.test.ts` | 시나리오 로직 테스트 |
+| `routes/*.test.ts` | 라우트 컴포넌트 테스트 |
 
 ---
 
@@ -168,27 +156,20 @@ describe("env.ts", () => {
 });
 ```
 
-### API 라우트 테스트
+### 컴포넌트 테스트
 
-Next.js App Router의 API 라우트를 직접 import해서 테스트:
+React 컴포넌트를 테스트:
 
 ```typescript
-import { POST } from "@/app/api/vapi/webhook/route";
-import { NextRequest } from "next/server";
+import { render, screen } from '@testing-library/react';
+import { describe, it, expect } from 'vitest';
+import { MyComponent } from '@/components/MyComponent';
 
-it("status-update 이벤트를 처리해야 함", async () => {
-  const request = new NextRequest("http://localhost/api/vapi/webhook", {
-    method: "POST",
-    body: JSON.stringify({
-      message: { type: "status-update", status: "in-progress" },
-    }),
+describe('MyComponent', () => {
+  it('renders correctly', () => {
+    render(<MyComponent />);
+    expect(screen.getByText('Expected Text')).toBeInTheDocument();
   });
-
-  const response = await POST(request);
-  const data = await response.json();
-
-  expect(response.status).toBe(200);
-  expect(data.received).toBe(true);
 });
 ```
 
@@ -242,9 +223,9 @@ export default defineConfig({
 
     // 테스트용 환경변수
     env: {
-      GEMINI_API_KEY: "test-gemini-api-key",
-      VAPI_PRIVATE_KEY: "test-vapi-private-key",
-      // ...
+      VITE_SUPABASE_URL: "https://test.supabase.co",
+      VITE_SUPABASE_ANON_KEY: "test-anon-key",
+      VITE_ELEVENLABS_AGENT_ID: "test-agent-id",
     },
   },
 
@@ -292,16 +273,16 @@ it("test", { timeout: 30000 }, async () => {});
 
 OpenAI SDK는 에러 시 내부적으로 재시도를 수행합니다. 에러 테스트에서 타임아웃이 발생할 수 있으므로, 필요 시 `maxRetries: 0` 옵션을 사용하거나 테스트를 skip 처리합니다.
 
-### 4. Next.js 예약어
+### 4. 예약어 사용 주의
 
-`module` 등 Next.js 예약어는 변수명으로 사용하면 ESLint 에러가 발생합니다:
+`module` 등 예약어는 변수명으로 사용하면 ESLint 에러가 발생합니다:
 
 ```typescript
 // ❌ ESLint 에러
-const module = await import("@/app/api/route");
+const module = await import("@/lib/myModule");
 
 // ✅ 올바른 사용
-const routeModule = await import("@/app/api/route");
+const myModule = await import("@/lib/myModule");
 ```
 
 ---
@@ -310,4 +291,4 @@ const routeModule = await import("@/app/api/route");
 
 - [Vitest 공식 문서](https://vitest.dev)
 - [MSW 공식 문서](https://mswjs.io)
-- [Next.js Testing](https://nextjs.org/docs/app/building-your-application/testing)
+- [Vite Testing Guide](https://vitejs.dev/guide/)

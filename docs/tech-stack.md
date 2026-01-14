@@ -4,7 +4,7 @@
 
 속지마랑은 React + Vite 기반의 SPA(Single Page Application)로, Supabase를 백엔드로 사용하고 Cloudflare Pages에 배포됩니다.
 
-React + Vite는 빠른 HMR과 최적화된 번들링으로 개발 생산성이 높고, 풍부한 생태계를 활용할 수 있어 선택했습니다. 백엔드는 Supabase를 사용해 Auth, Database, Storage, Edge Functions를 하나의 플랫폼에서 통합 관리합니다. 서버리스 함수는 Cloudflare Workers 대신 Supabase Edge Functions를 선택했는데, Vapi API를 통한 음성 통화 시작은 응답 속도보다 안정성이 중요하고, Edge Functions의 최대 150초 타임아웃이 30초 제한인 Workers보다 여유롭기 때문입니다. 200ms 수준의 Cold Start도 통화 연결 UX에 큰 영향을 주지 않으며, MVP 단계에서 플랫폼을 통합해 관리 복잡도를 낮추는 것이 유리하다고 판단했습니다. 정적 호스팅은 Cloudflare Pages를 사용하는데, 무료 무제한 대역폭과 글로벌 CDN을 제공하고 Git 연동으로 자동 배포가 간편하기 때문입니다.
+React + Vite는 빠른 HMR과 최적화된 번들링으로 개발 생산성이 높고, 풍부한 생태계를 활용할 수 있어 선택했습니다. 백엔드는 Supabase를 사용해 Auth, Database, Storage, Edge Functions를 하나의 플랫폼에서 통합 관리합니다. 음성 AI는 ElevenLabs Conversational AI를 사용해 저지연 실시간 음성 대화를 구현합니다. ElevenLabs는 WebSocket/WebRTC 연결을 지원하며, STT, LLM, TTS를 통합 제공하여 별도의 파이프라인 구성 없이 즉시 사용할 수 있습니다. 서버리스 함수는 Supabase Edge Functions를 사용하며, ElevenLabs API 키 보호 및 Signed URL 발급을 담당합니다. 정적 호스팅은 Cloudflare Pages를 사용하는데, 무료 무제한 대역폭과 글로벌 CDN을 제공하고 Git 연동으로 자동 배포가 간편하기 때문입니다.
 
 ---
 
@@ -23,11 +23,7 @@ React + Vite는 빠른 HMR과 최적화된 번들링으로 개발 생산성이 �
 │  │  │              - TailwindCSS                                 │  │  │
 │  │  │              - React Router                                │  │  │
 │  │  │              - TanStack Query                              │  │  │
-│  │  └────────────────────────────────────────────────────────────┘  │  │
-│  │                             │                                     │  │
-│  │  ┌────────────────────────────────────────────────────────────┐  │  │
-│  │  │           Cloudflare Functions (선택적)                    │  │  │
-│  │  │           - A/B 테스트, 엣지 로직                          │  │  │
+│  │  │              - @elevenlabs/client                          │  │  │
 │  │  └────────────────────────────────────────────────────────────┘  │  │
 │  └──────────────────────────────────────────────────────────────────┘  │
 │                                │                                        │
@@ -43,12 +39,11 @@ React + Vite는 빠른 HMR과 최적화된 번들링으로 개발 생산성이 �
 │                                │                                        │
 │                                ▼                                        │
 │  ┌──────────────────────────────────────────────────────────────────┐  │
-│  │                     Voice AI Services                            │  │
-│  │  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌────────────┐  │  │
-│  │  │   Vapi.ai   │ │   OpenAI    │ │   Google    │ │ ElevenLabs │  │  │
-│  │  │(Orchestrator│ │  Whisper    │ │   Gemini    │ │   (TTS)    │  │  │
-│  │  │             │ │   (STT)     │ │   (LLM)     │ │            │  │  │
-│  │  └─────────────┘ └─────────────┘ └─────────────┘ └────────────┘  │  │
+│  │              ElevenLabs Conversational AI                        │  │
+│  │  ┌────────────────────────────────────────────────────────────┐  │  │
+│  │  │  WebSocket/WebRTC  │  Built-in LLM  │  ElevenLabs TTS      │  │  │
+│  │  │  (실시간 연결)      │  (대화 처리)    │  (음성 합성)         │  │  │
+│  │  └────────────────────────────────────────────────────────────┘  │  │
 │  └──────────────────────────────────────────────────────────────────┘  │
 │                                                                         │
 └─────────────────────────────────────────────────────────────────────────┘
@@ -82,7 +77,8 @@ import { z } from 'zod';
 // 1. 스키마 정의 = 데이터 형태 규칙
 const envSchema = z.object({
   VITE_SUPABASE_URL: z.string().url(),
-  VITE_VAPI_PUBLIC_KEY: z.string().min(1),
+  VITE_SUPABASE_ANON_KEY: z.string().min(1),
+  VITE_ELEVENLABS_AGENT_ID: z.string().min(1),
 });
 
 // 2. 검증 실행
@@ -116,10 +112,8 @@ const env = result.data; // { VITE_SUPABASE_URL: string, ... }
 
 | 서비스 | 역할 | 담당 기능 |
 |--------|------|----------|
-| **Vapi.ai** | Orchestrator | 음성 파이프라인 통합 관리 |
-| **OpenAI Whisper** | STT | 한국어 음성 → 텍스트 변환 |
-| **Google Gemini Flash** | LLM | 대화 응답 생성, 시나리오 흐름 제어 |
-| **ElevenLabs** | TTS | 텍스트 → 음성 변환, Voice Cloning |
+| **ElevenLabs Conversational AI** | 음성 AI 플랫폼 | 실시간 음성 대화 (STT + LLM + TTS 통합) |
+| **@elevenlabs/client** | 클라이언트 SDK | WebSocket/WebRTC 연결, 세션 관리 |
 
 ### 배포 & 인프라
 
@@ -135,18 +129,25 @@ const env = result.data; // { VITE_SUPABASE_URL: string, ... }
 ### 1. 통화 시작 플로우
 
 ```
-사용자 → React App → Supabase Edge Function → Vapi API → 통화 시작
-                           │
-                           └── API Key 보호 (서버에서만 사용)
+사용자 → React App → Supabase Edge Function → Signed URL 발급
+                              ↓
+              ElevenLabs Conversational AI 세션 시작
+              (WebSocket 또는 WebRTC 연결)
 ```
 
-### 2. 인증 플로우
+### 2. 실시간 통화 플로우
+
+```
+사용자 음성 → 브라우저 마이크 → ElevenLabs (STT → LLM → TTS) → 스피커 출력
+```
+
+### 4. 인증 플로우
 
 ```
 사용자 → React App → Supabase Auth → JWT 발급 → 인증된 요청
 ```
 
-### 3. 데이터 조회 플로우
+### 5. 데이터 조회 플로우
 
 ```
 React App → Supabase Client → PostgreSQL (RLS 적용) → 본인 데이터만 반환
@@ -160,13 +161,11 @@ React App → Supabase Client → PostgreSQL (RLS 적용) → 본인 데이터�
 
 | Key | 저장 위치 | 노출 여부 |
 |-----|----------|----------|
-| `SUPABASE_URL` | 환경변수 (클라이언트) | O (공개 가능) |
-| `SUPABASE_ANON_KEY` | 환경변수 (클라이언트) | O (RLS가 보호) |
+| `VITE_SUPABASE_URL` | 환경변수 (클라이언트) | O (공개 가능) |
+| `VITE_SUPABASE_ANON_KEY` | 환경변수 (클라이언트) | O (RLS가 보호) |
+| `VITE_ELEVENLABS_AGENT_ID` | 환경변수 (클라이언트) | O (Signed URL로 보호) |
 | `SUPABASE_SERVICE_ROLE_KEY` | Edge Function 환경변수 | X (절대 노출 금지) |
-| `VAPI_API_KEY` | Edge Function 환경변수 | X |
-| `OPENAI_API_KEY` | Vapi 대시보드 | X |
-| `GEMINI_API_KEY` | Vapi 대시보드 | X |
-| `ELEVENLABS_API_KEY` | Vapi/Edge Function | X |
+| `ELEVENLABS_API_KEY` | Edge Function 환경변수 | X (절대 노출 금지) |
 
 ### 클라이언트에서 직접 호출 가능한 것
 
@@ -179,11 +178,15 @@ const { data } = await supabase.from('calls').select('*');
 ### 반드시 Edge Function 경유해야 하는 것
 
 ```typescript
-// 통화 시작 - Vapi API Key 필요
-await supabase.functions.invoke('start-call', { body: { scenarioId } });
+// Signed URL 발급 - ElevenLabs API Key 필요
+await supabase.functions.invoke('elevenlabs-get-signed-url', {
+  body: { agentId }
+});
 
-// Voice Cloning - ElevenLabs API Key 필요
-await supabase.functions.invoke('clone-voice', { body: { audioUrl } });
+// 에이전트 생성/업데이트 - ElevenLabs API Key 필요
+await supabase.functions.invoke('elevenlabs-create-agent', {
+  body: { config }
+});
 ```
 
 ---
@@ -205,15 +208,19 @@ sokjimarang/
 │   │   └── training/            # 훈련 관련 컴포넌트
 │   ├── lib/                     # 외부 서비스 클라이언트
 │   │   ├── supabase.ts          # Supabase 클라이언트
-│   │   └── vapi.ts              # Vapi 웹 클라이언트
+│   │   └── elevenlabs/          # ElevenLabs 클라이언트
+│   │       ├── conversation.ts  # 대화 세션 관리
+│   │       ├── hooks/           # React 훅 (useSignedUrl 등)
+│   │       └── agents/          # 에이전트 설정
+│   │           └── prosecutor/  # 검사 사칭 시나리오
 │   ├── hooks/                   # 커스텀 훅
 │   ├── stores/                  # Zustand 스토어
 │   └── types/                   # TypeScript 타입
 │
 ├── supabase/
 │   ├── functions/               # Edge Functions
-│   │   ├── start-call/          # 통화 시작
-│   │   └── webhook-vapi/        # Vapi 웹훅
+│   │   ├── elevenlabs-get-signed-url/  # Signed URL 발급
+│   │   └── elevenlabs-create-agent/    # 에이전트 생성
 │   └── migrations/              # DB 마이그레이션
 │
 ├── docs/                        # 문서
@@ -225,23 +232,21 @@ sokjimarang/
 
 ## 환경변수
 
-### 클라이언트 (.env)
+### 클라이언트 (.env.local)
 
 ```bash
 # Supabase (공개 가능)
 VITE_SUPABASE_URL=https://xxx.supabase.co
 VITE_SUPABASE_ANON_KEY=eyJhbGc...
 
-# Vapi Public Token (공개 가능 - 웹 SDK용)
-VITE_VAPI_PUBLIC_KEY=xxx
+# ElevenLabs Agent ID (공개 가능 - Signed URL로 보호)
+VITE_ELEVENLABS_AGENT_ID=xxx
 ```
 
 ### Supabase Edge Functions (비공개)
 
 ```bash
 # Supabase Secrets에 저장
-SUPABASE_SERVICE_ROLE_KEY=eyJhbGc...
-VAPI_API_KEY=xxx
 ELEVENLABS_API_KEY=xxx
 ```
 
@@ -355,7 +360,6 @@ WebSocket과 WebRTC 간 **비용 차이 없음**. ElevenLabs Conversational AI �
 - [Vite 공식 문서](https://vitejs.dev)
 - [Supabase 공식 문서](https://supabase.com/docs)
 - [Cloudflare Pages 공식 문서](https://developers.cloudflare.com/pages)
-- [Vapi.ai 공식 문서](https://docs.vapi.ai)
 - [TanStack Query 공식 문서](https://tanstack.com/query)
 - [ElevenLabs Conversational AI SDK (JS)](https://elevenlabs.io/docs/agents-platform/libraries/java-script)
 - [ElevenLabs React SDK](https://elevenlabs.io/docs/conversational-ai-sdks/javascript/react-sdk)

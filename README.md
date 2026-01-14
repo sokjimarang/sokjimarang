@@ -16,10 +16,10 @@
 | **Frontend** | React 19, Vite, TypeScript, TailwindCSS |
 | **상태 관리** | TanStack Query, Zustand |
 | **Backend** | Supabase (PostgreSQL, Auth, Storage, Edge Functions) |
-| **Voice AI** | Vapi.ai, OpenAI Whisper, Google Gemini, ElevenLabs |
+| **Voice AI** | ElevenLabs Conversational AI |
 | **배포** | Cloudflare Pages |
 
-> 상세한 기술 스택 문서는 [docs/TECH_STACK.md](./docs/TECH_STACK.md)를 참고하세요.
+> 상세한 기술 스택 문서는 [docs/tech-stack.md](./docs/tech-stack.md)를 참고하세요.
 
 ## 시작하기
 
@@ -28,7 +28,7 @@
 - Node.js 20+
 - pnpm 9+
 - Supabase 계정
-- Vapi.ai 계정
+- ElevenLabs 계정
 
 ### 설치
 
@@ -55,6 +55,15 @@ pnpm dev
 pnpm build
 ```
 
+### 주요 스크립트
+
+| 명령어 | 설명 |
+|--------|------|
+| `pnpm dev` | 개발 서버 실행 |
+| `pnpm build` | 프로덕션 빌드 |
+| `pnpm test` | 테스트 실행 |
+| `pnpm agent:update` | ElevenLabs 에이전트 설정 업데이트 |
+
 ## 프로젝트 구조
 
 ```
@@ -74,8 +83,10 @@ sokjimarang/
 
 ## 문서
 
-- [기술 스택 상세](./docs/TECH_STACK.md)
-- [기획서 리뷰](./docs/proposal-review.md)
+- [기술 스택 상세](./docs/tech-stack.md)
+- [ElevenLabs 에이전트 스펙](./docs/elevenlabs-agent-spec.md)
+- [테스트 가이드](./docs/testing.md)
+- [트러블슈팅](./docs/troubleshooting.md)
 
 ## 라이선스
 

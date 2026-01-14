@@ -161,11 +161,13 @@ docs/
 ## 미구현 사항
 
 분석 결과 추가 리팩토링 가능 영역:
-1. `useVapiCall.startCall()` 함수 분할 (현재 ~120줄)
+1. `useElevenLabsCall` 훅 최적화
 2. `DebriefPage` 페이즈별 컴포넌트 분리
 3. `HomePage` UI 컴포넌트 추출
 
 이들은 현재 기능에 영향 없이 향후 코드 품질 개선으로 고려.
+
+> **Note:** 음성 AI는 Vapi에서 ElevenLabs Conversational AI로 마이그레이션 완료됨 (2026-01)
 
 ---
 
