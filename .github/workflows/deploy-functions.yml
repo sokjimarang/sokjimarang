@@ -1,0 +1,26 @@
+name: Deploy Supabase Functions
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'supabase/functions/**'
+      - 'supabase/config.toml'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy Edge Functions
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - run: |
+          supabase functions deploy custom-llm --project-ref ${{ secrets.SUPABASE_PROJECT_ID }}
+          supabase functions deploy vapi-webhook --project-ref ${{ secrets.SUPABASE_PROJECT_ID }}
+          supabase functions deploy elevenlabs-create-agent --project-ref ${{ secrets.SUPABASE_PROJECT_ID }}
+          supabase functions deploy elevenlabs-get-signed-url --project-ref ${{ secrets.SUPABASE_PROJECT_ID }}
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
