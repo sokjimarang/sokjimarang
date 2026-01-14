@@ -1,4 +1,4 @@
-import { useState, useCallback, type ReactNode } from 'react'
+import { useState, useCallback, useRef, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { OverlayContext, type OverlayContextType } from './useOverlay'
 
@@ -13,35 +13,26 @@ interface OverlayProviderProps {
 
 function OverlayProvider({ children }: OverlayProviderProps) {
   const [overlays, setOverlays] = useState<OverlayElement[]>([])
-  const [resolvers, setResolvers] = useState<Map<string, (value: unknown) => void>>(
-    new Map()
-  )
+  const resolversRef = useRef<Map<string, (value: unknown) => void>>(new Map())
 
   const generateId = useCallback(() => {
     return Math.random().toString(36).slice(2) + Date.now().toString(36)
   }, [])
 
-  const close = useCallback(
-    (id: string, result?: unknown) => {
-      const resolver = resolvers.get(id)
-      if (resolver) {
-        resolver(result)
-        setResolvers((prev) => {
-          const next = new Map(prev)
-          next.delete(id)
-          return next
-        })
-      }
-      setOverlays((prev) => prev.filter((overlay) => overlay.id !== id))
-    },
-    [resolvers]
-  )
+  const close = useCallback((id: string, result?: unknown) => {
+    const resolver = resolversRef.current.get(id)
+    if (resolver) {
+      resolver(result)
+      resolversRef.current.delete(id)
+    }
+    setOverlays((prev) => prev.filter((overlay) => overlay.id !== id))
+  }, [])
 
   const closeAll = useCallback(() => {
-    resolvers.forEach((resolver) => resolver(undefined))
-    setResolvers(new Map())
+    resolversRef.current.forEach((resolver) => resolver(undefined))
+    resolversRef.current.clear()
     setOverlays([])
-  }, [resolvers])
+  }, [])
 
   const open = useCallback(
     <T,>(
@@ -54,9 +45,7 @@ function OverlayProvider({ children }: OverlayProviderProps) {
           close(id, result)
         }
 
-        setResolvers(
-          (prev) => new Map(prev).set(id, resolve as (value: unknown) => void)
-        )
+        resolversRef.current.set(id, resolve as (value: unknown) => void)
         setOverlays((prev) => [
           ...prev,
           {
