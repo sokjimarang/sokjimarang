@@ -6,7 +6,7 @@ import {
   endConversation,
   type ConversationInstance,
 } from '@/lib/elevenlabs/conversation'
-import { hasEndScenarioTag } from '@/lib/scenarios'
+import { hasEndScenarioTag, parseEndScenarioTag, type EndScenarioData } from '@/lib/scenarios'
 import { supabase, isSupabaseConfigured } from '@/lib/supabase'
 import {
   MAX_CALL_DURATION_SECONDS,
@@ -41,6 +41,7 @@ function useElevenLabsCall({ scenarioType, onCallEnd }: UseElevenLabsCallOptions
     setAiSpeaking,
     updateCallDuration,
     endTraining,
+    endTrainingWithData,
   } = useTrainingStore()
 
   const { fetchSignedUrl, clearCache } = useSignedUrl(ELEVENLABS_AGENT_ID || '')
@@ -66,7 +67,7 @@ function useElevenLabsCall({ scenarioType, onCallEnd }: UseElevenLabsCallOptions
     return data as unknown as TrainingSession
   }, [scenarioType, context])
 
-  const handleEndConversation = useCallback(async (reason: string) => {
+  const handleEndConversation = useCallback(async (reason: string, scenarioData?: EndScenarioData) => {
     if (isEndingRef.current) return
     isEndingRef.current = true
 
@@ -85,9 +86,15 @@ function useElevenLabsCall({ scenarioType, onCallEnd }: UseElevenLabsCallOptions
     }
 
     setIsConnected(false)
-    endTraining(reason)
+
+    if (scenarioData) {
+      endTrainingWithData(scenarioData)
+    } else {
+      endTraining(reason)
+    }
+
     onCallEnd?.()
-  }, [endTraining, onCallEnd])
+  }, [endTraining, endTrainingWithData, onCallEnd])
 
   const startCall = useCallback(async () => {
     if (!ELEVENLABS_AGENT_ID) {
@@ -146,8 +153,9 @@ function useElevenLabsCall({ scenarioType, onCallEnd }: UseElevenLabsCallOptions
           })
 
           if (speaker === 'ai' && hasEndScenarioTag(message.message)) {
+            const scenarioData = parseEndScenarioTag(message.message)
             setTimeout(() => {
-              handleEndConversation('scenario_completed')
+              handleEndConversation('scenario_completed', scenarioData ?? undefined)
             }, END_SCENARIO_DELAY_MS)
           }
         },
