@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 
 import { useTrainingStore } from '@/stores'
 import { useElevenLabsCall } from '@/hooks/useElevenLabsCall'
+import { useBackgroundNoise } from '@/hooks/useBackgroundNoise'
 import { getScenarioMetadata } from '@/lib/scenarios'
 import { formatTime } from '@/lib/time'
 import { useOverlay, ConfirmModal } from '@/components/ui/overlay'
@@ -26,6 +27,8 @@ function CallPage() {
       navigate('/training/debrief')
     },
   })
+
+  useBackgroundNoise(isConnected || isConnecting)
 
   useEffect(() => {
     if (!scenarioType || !scenario) {
