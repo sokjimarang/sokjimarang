@@ -41,7 +41,7 @@
 ```typescript
 {
   tts: {
-    voice_id: 'nPczCjzI2devNBz1zQrb',
+    voice_id: 'WzMnDIgiICcj1oXbUBO0',
     model_id: 'eleven_turbo_v2_5',
     optimize_streaming_latency: 3,
   },
