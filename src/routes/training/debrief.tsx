@@ -1,21 +1,12 @@
 import { useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import {
-  CheckCircleIcon,
-  ExclamationTriangleIcon,
-  CheckIcon,
-  ChartBarIcon,
-  ChatBubbleLeftRightIcon,
-  ArrowLeftIcon,
-  UserIcon,
-} from '@heroicons/react/24/solid'
-import { ClockIcon } from '@heroicons/react/24/outline'
+import { ArrowLeftIcon } from '@heroicons/react/24/solid'
 
 import { useTrainingStore } from '@/stores'
 import { getScenarioMetadata, removeEndScenarioTag } from '@/lib/scenarios'
 import { formatTime } from '@/lib/time'
 import { TOTAL_STAGES } from '@/lib/constants'
-import { getDebriefMessage } from './debrief.utils.tsx'
+import { getDebriefData } from './debrief.utils.tsx'
 import { Button } from '@/components/ui/Button'
 
 function DebriefPage() {
@@ -38,110 +29,108 @@ function DebriefPage() {
   }
 
   const reachedStage = currentSession?.reached_stage ?? 0
-  const debriefMessage = getDebriefMessage(currentSession?.termination_reason ?? null)
+  const debrief = getDebriefData(currentSession?.termination_reason ?? null)
 
   return (
-    <div className="min-h-screen bg-neutral-50">
+    <div className="min-h-screen bg-neutral-900 text-neutral-100">
       {/* 헤더 */}
-      <header className="bg-white/80 backdrop-blur-sm border-b border-neutral-100 px-4 py-4 sticky top-0 z-10">
+      <header className="border-b border-neutral-800 px-5 py-4">
         <button
           onClick={handleComplete}
-          className="flex items-center gap-2 text-neutral-500 hover:text-neutral-700 font-medium transition-colors"
+          className="flex items-center gap-2 text-neutral-400 hover:text-neutral-100 transition-colors text-sm tracking-wide"
         >
-          <ArrowLeftIcon className="w-5 h-5" />
-          <span>홈</span>
+          <ArrowLeftIcon className="w-4 h-4" />
+          <span>나가기</span>
         </button>
       </header>
 
-      <main className="p-4 space-y-6 max-w-2xl mx-auto pb-8">
-        {/* 결과 카드 - 큰 아이콘과 메시지 */}
-        <section
-          className={`rounded-2xl p-6 shadow-sm border-l-4 ${debriefMessage.bgClass} ${debriefMessage.borderClass}`}
-        >
-          <div className="flex items-start gap-4">
-            {/* 아이콘 영역 */}
-            <div className="w-12 h-12 flex-shrink-0 rounded-xl bg-white/50 flex items-center justify-center">
-              {debriefMessage.iconComponent}
-            </div>
+      <main className="max-w-xl mx-auto px-5 py-8">
+        {/* 결과 헤더 - 큰 타이포그래피 */}
+        <section className="mb-10">
+          <div className={`inline-block px-3 py-1.5 text-xs font-semibold tracking-widest uppercase mb-4 ${debrief.badgeClass}`}>
+            {debrief.badge}
+          </div>
+          <h1 className={`text-3xl font-bold tracking-tight mb-3 ${debrief.titleClass}`}>
+            {debrief.title}
+          </h1>
+          <p className="text-neutral-400 text-base leading-relaxed">
+            {debrief.description}
+          </p>
+        </section>
 
-            <div className="flex-1">
-              <h2 className={`font-bold text-xl mb-2 ${debriefMessage.textClass}`}>
-                {debriefMessage.title}
-              </h2>
-              <p className={`text-base leading-relaxed ${debriefMessage.textClass} opacity-90`}>
-                {debriefMessage.description}
+        {/* 훈련 통계 - 그리드 레이아웃 */}
+        <section className="mb-10">
+          <h2 className="text-xs font-semibold tracking-widest uppercase text-neutral-500 mb-4">
+            훈련 통계
+          </h2>
+          <div className="grid grid-cols-3 gap-px bg-neutral-800 border border-neutral-800">
+            <div className="bg-neutral-900 p-4">
+              <p className="text-xs text-neutral-500 mb-1">시나리오</p>
+              <p className="text-sm font-medium text-neutral-200 truncate">{scenario.name}</p>
+            </div>
+            <div className="bg-neutral-900 p-4">
+              <p className="text-xs text-neutral-500 mb-1">진행도</p>
+              <p className="text-sm font-medium text-neutral-200">
+                <span className="text-lg font-bold">{reachedStage}</span>
+                <span className="text-neutral-500">/{TOTAL_STAGES}</span>
               </p>
             </div>
-          </div>
-        </section>
-
-        {/* 훈련 결과 */}
-        <section className="bg-white rounded-2xl p-5 shadow-sm">
-          <div className="flex items-center gap-2 mb-4">
-            <ChartBarIcon className="w-5 h-5 text-primary-600" />
-            <h2 className="font-semibold text-neutral-800">훈련 결과</h2>
-          </div>
-
-          <div className="space-y-3">
-            <div className="flex items-center justify-between py-2 border-b border-neutral-100 last:border-0">
-              <span className="text-sm text-neutral-500 font-medium">시나리오</span>
-              <span className="text-base text-neutral-800 font-semibold">{scenario.name}</span>
-            </div>
-            <div className="flex items-center justify-between py-2 border-b border-neutral-100 last:border-0">
-              <span className="text-sm text-neutral-500 font-medium">진행 단계</span>
-              <span className="text-base text-neutral-800 font-semibold">
-                {reachedStage} / {TOTAL_STAGES} 단계
-              </span>
-            </div>
-            <div className="flex items-center justify-between py-2">
-              <span className="text-sm text-neutral-500 font-medium flex items-center gap-1">
-                <ClockIcon className="w-4 h-4" />
-                소요 시간
-              </span>
-              <span className="text-base text-neutral-800 font-semibold font-mono">
-                {formatTime(callDuration)}
-              </span>
+            <div className="bg-neutral-900 p-4">
+              <p className="text-xs text-neutral-500 mb-1">소요 시간</p>
+              <p className="text-sm font-mono font-medium text-neutral-200">{formatTime(callDuration)}</p>
             </div>
           </div>
         </section>
 
-        {/* 수상한 점 */}
-        <section className="bg-white rounded-2xl p-5 shadow-sm">
-          <div className="flex items-center gap-2 mb-4">
-            <ExclamationTriangleIcon className="w-5 h-5 text-warning-500" />
-            <h2 className="font-semibold text-neutral-800">이런 점이 수상했습니다</h2>
-          </div>
-
-          <div className="space-y-3">
+        {/* 수상한 점 - 번호 리스트 */}
+        <section className="mb-10">
+          <h2 className="text-xs font-semibold tracking-widest uppercase text-neutral-500 mb-4">
+            포착된 수법
+          </h2>
+          <div className="space-y-0">
             {scenario.detectionPoints.slice(0, reachedStage + 1).map((point, index) => (
               <div
                 key={index}
-                className="p-4 bg-warning-50 rounded-xl border-l-4 border-warning-500"
+                className="group border-l-2 border-danger-500/60 pl-4 py-3 hover:border-danger-500 hover:bg-danger-500/5 transition-all"
               >
-                <p className="font-medium text-warning-900 mb-1">&quot;{point.pattern}&quot;</p>
-                <p className="text-sm text-warning-700 pl-3">→ {point.explanation}</p>
+                <div className="flex items-start gap-3">
+                  <span className="flex-shrink-0 w-5 h-5 flex items-center justify-center text-[10px] font-bold bg-danger-500/20 text-danger-500 rounded">
+                    {index + 1}
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-neutral-100 text-sm leading-snug mb-1">
+                      {point.pattern}
+                    </p>
+                    <p className="text-xs text-neutral-500 leading-relaxed">
+                      {point.explanation}
+                    </p>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
         </section>
 
-        {/* 올바른 대응 */}
-        <section className="bg-white rounded-2xl p-5 shadow-sm">
-          <div className="flex items-center gap-2 mb-4">
-            <CheckCircleIcon className="w-5 h-5 text-success-500" />
-            <h2 className="font-semibold text-neutral-800">이렇게 대응하세요</h2>
-          </div>
-
-          <div className="space-y-3">
+        {/* 올바른 대응 - 체크 리스트 */}
+        <section className="mb-10">
+          <h2 className="text-xs font-semibold tracking-widest uppercase text-neutral-500 mb-4">
+            올바른 대응법
+          </h2>
+          <div className="space-y-2">
             {scenario.correctResponses.map((response, index) => (
-              <div key={index} className="flex items-start gap-3 p-4 bg-success-50 rounded-xl">
-                <div className="w-5 h-5 flex-shrink-0 rounded-full bg-success-500 flex items-center justify-center mt-0.5">
-                  <CheckIcon className="w-3 h-3 text-white" />
+              <div
+                key={index}
+                className="group flex items-start gap-3 p-3 bg-neutral-800/50 hover:bg-neutral-800 transition-colors"
+              >
+                <div className="flex-shrink-0 w-5 h-5 flex items-center justify-center mt-0.5">
+                  <svg className="w-4 h-4 text-success-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
                 </div>
-                <div className="flex-1">
-                  <p className="font-medium text-success-900">{response.action}</p>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-neutral-200 text-sm">{response.action}</p>
                   {response.description && (
-                    <p className="text-sm text-success-700 mt-1">{response.description}</p>
+                    <p className="text-xs text-neutral-500 mt-0.5">{response.description}</p>
                   )}
                 </div>
               </div>
@@ -151,39 +140,26 @@ function DebriefPage() {
 
         {/* 대화 기록 */}
         {transcripts.length > 0 && (
-          <section className="bg-white rounded-2xl p-5 shadow-sm">
-            <div className="flex items-center gap-2 mb-4">
-              <ChatBubbleLeftRightIcon className="w-5 h-5 text-primary-600" />
-              <h2 className="font-semibold text-neutral-800">대화 기록</h2>
-            </div>
-
-            <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
+          <section className="mb-10">
+            <h2 className="text-xs font-semibold tracking-widest uppercase text-neutral-500 mb-4">
+              대화 기록
+            </h2>
+            <div className="space-y-1 max-h-80 overflow-y-auto">
               {transcripts.map((msg, index) => (
                 <div
                   key={index}
-                  className={`p-4 rounded-xl border-l-4 ${
+                  className={`py-3 px-3 ${
                     msg.speaker === 'ai'
-                      ? 'bg-primary-50 border-primary-500'
-                      : 'bg-neutral-50 border-neutral-400'
+                      ? 'bg-neutral-800/80 border-l-2 border-primary-500/60'
+                      : 'bg-transparent border-l-2 border-neutral-700'
                   }`}
                 >
-                  <div className="flex items-center gap-2 mb-2">
-                    <div
-                      className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                        msg.speaker === 'ai' ? 'bg-primary-100' : 'bg-neutral-200'
-                      }`}
-                    >
-                      {msg.speaker === 'ai' ? (
-                        <span className="text-xs">AI</span>
-                      ) : (
-                        <UserIcon className="w-4 h-4 text-neutral-600" />
-                      )}
-                    </div>
-                    <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide">
-                      {msg.speaker === 'ai' ? '사기범 (AI)' : '나'}
-                    </p>
-                  </div>
-                  <p className="text-neutral-800 leading-relaxed">
+                  <p className={`text-[10px] font-semibold uppercase tracking-wider mb-1 ${
+                    msg.speaker === 'ai' ? 'text-primary-400' : 'text-neutral-500'
+                  }`}>
+                    {msg.speaker === 'ai' ? '사기범' : '나'}
+                  </p>
+                  <p className="text-sm text-neutral-300 leading-relaxed">
                     {removeEndScenarioTag(msg.text)}
                   </p>
                 </div>
@@ -193,8 +169,13 @@ function DebriefPage() {
         )}
 
         {/* 완료 버튼 */}
-        <Button variant="primary" size="lg" onClick={handleComplete} className="w-full">
-          완료
+        <Button
+          variant="primary"
+          size="lg"
+          onClick={handleComplete}
+          className="w-full bg-neutral-100 text-neutral-900 hover:bg-white font-semibold tracking-wide"
+        >
+          홈으로 돌아가기
         </Button>
       </main>
     </div>

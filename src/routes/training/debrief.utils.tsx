@@ -1,66 +1,50 @@
-import {
-  CheckCircleIcon,
-  HandThumbUpIcon,
-  ExclamationTriangleIcon,
-  ChartBarIcon,
-} from '@heroicons/react/24/solid'
-
-interface DebriefMessage {
-  icon: string // 레거시 지원을 위해 유지
-  iconComponent: React.ReactNode // 새로운 아이콘 컴포넌트
+interface DebriefData {
+  badge: string
+  badgeClass: string
   title: string
+  titleClass: string
   description: string
-  bgClass: string
-  borderClass: string
-  textClass: string
 }
 
-function getDebriefMessage(terminationReason: string | null): DebriefMessage {
+function getDebriefData(terminationReason: string | null): DebriefData {
   switch (terminationReason) {
     case 'user_rejected':
       return {
-        icon: '🎉',
-        iconComponent: <CheckCircleIcon className="w-8 h-8 text-success-600" />,
-        title: '잘하셨습니다!',
+        badge: '훈련 성공',
+        badgeClass: 'bg-success-500/20 text-success-500',
+        title: '보이스피싱을 간파했습니다',
+        titleClass: 'text-success-500',
         description:
-          '보이스피싱을 정확히 알아채고 거부하셨습니다. 실제 상황에서도 이렇게 대응하세요.',
-        bgClass: 'bg-success-50',
-        borderClass: 'border-success-500',
-        textClass: 'text-success-900',
+          '수고하셨습니다. 사기 전화의 특징을 정확히 파악하고 거부하셨습니다. 실제 상황에서도 동일하게 대응해 주세요.',
       }
     case 'user_suspected':
       return {
-        icon: '👍',
-        iconComponent: <HandThumbUpIcon className="w-8 h-8 text-primary-600" />,
-        title: '좋습니다!',
+        badge: '의심 유지',
+        badgeClass: 'bg-primary-500/20 text-primary-400',
+        title: '끝까지 경계를 유지했습니다',
+        titleClass: 'text-primary-400',
         description:
-          '끝까지 의심을 유지하셨습니다. 의심스러운 전화는 일단 끊고 확인하는 것이 중요합니다.',
-        bgClass: 'bg-primary-50',
-        borderClass: 'border-primary-500',
-        textClass: 'text-primary-900',
+          '의심스러운 전화는 일단 끊고 공식 기관에 직접 확인하는 것이 안전합니다. 이 습관을 유지해 주세요.',
       }
     case 'user_fooled':
       return {
-        icon: '⚠️',
-        iconComponent: <ExclamationTriangleIcon className="w-8 h-8 text-danger-600" />,
-        title: '주의가 필요합니다',
-        description: '보이스피싱에 당할 위험이 높습니다. 아래 수법들을 꼭 기억해두세요.',
-        bgClass: 'bg-danger-50',
-        borderClass: 'border-danger-500',
-        textClass: 'text-danger-900',
+        badge: '주의 필요',
+        badgeClass: 'bg-danger-500/20 text-danger-500',
+        title: '사기에 속을 위험이 있습니다',
+        titleClass: 'text-danger-500',
+        description:
+          '보이스피싱 수법에 넘어갈 가능성이 높습니다. 아래 포착된 수법들을 반드시 숙지하세요.',
       }
     default:
       return {
-        icon: '📊',
-        iconComponent: <ChartBarIcon className="w-8 h-8 text-neutral-600" />,
-        title: '훈련 완료',
-        description: '훈련 결과를 확인하세요.',
-        bgClass: 'bg-neutral-50',
-        borderClass: 'border-neutral-500',
-        textClass: 'text-neutral-900',
+        badge: '훈련 종료',
+        badgeClass: 'bg-neutral-700 text-neutral-400',
+        title: '훈련이 완료되었습니다',
+        titleClass: 'text-neutral-200',
+        description: '아래에서 훈련 결과를 확인할 수 있습니다.',
       }
   }
 }
 
-export { getDebriefMessage }
-export type { DebriefMessage }
+export { getDebriefData }
+export type { DebriefData }

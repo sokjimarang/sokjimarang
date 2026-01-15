@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 
 import { useTrainingStore } from '@/stores'
 import { useElevenLabsCall } from '@/hooks/useElevenLabsCall'
+import { useBackgroundNoise } from '@/hooks/useBackgroundNoise'
 import { getScenarioMetadata } from '@/lib/scenarios'
 import { formatTime } from '@/lib/time'
 import { useOverlay, ConfirmModal } from '@/components/ui/overlay'
@@ -27,6 +28,8 @@ function CallPage() {
     },
   })
 
+  useBackgroundNoise(isConnected || isConnecting)
+
   useEffect(() => {
     if (!scenarioType || !scenario) {
       navigate('/')
@@ -48,7 +51,6 @@ function CallPage() {
 
   useEffect(() => {
     if (!isAiSpeaking) {
-      setWaveTick(0)
       return
     }
 
@@ -58,6 +60,8 @@ function CallPage() {
 
     return () => clearInterval(interval)
   }, [isAiSpeaking])
+
+  const waveDisplayTick = isAiSpeaking ? waveTick : 0
 
   const handleEndCall = async () => {
     const confirmed = await open<boolean>(({ close }) => (
@@ -109,7 +113,7 @@ function CallPage() {
                 }`}
                 style={{
                   height: isAiSpeaking
-                    ? `${20 + Math.sin((waveTick / 2 + i) * 0.7) * 10}px`
+                    ? `${20 + Math.sin((waveDisplayTick / 2 + i) * 0.7) * 10}px`
                     : isConnected
                       ? '12px'
                       : '8px',
