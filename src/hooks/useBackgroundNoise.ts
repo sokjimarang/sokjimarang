@@ -91,9 +91,6 @@ function useBackgroundNoise(active: boolean) {
       if (sourceRef.current) {
         try {
           sourceRef.current.stop()
-        } catch (err) {
-          void err
-        }
         sourceRef.current.disconnect()
         sourceRef.current = null
       }
