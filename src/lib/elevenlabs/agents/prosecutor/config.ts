@@ -8,10 +8,15 @@ import { BASE_SYSTEM_PROMPT, FIRST_MESSAGE } from './prompts/base'
 
 /**
  * 한국어 남성 음성 ID (ElevenLabs)
- * Brian 음성 - 권위적이고 중저음 (영어지만 한국어 지원)
- * 실제 배포 시 한국어 전용 음성으로 교체 필요
+ * ELEVENLABS_VOICE_ID 환경변수로 한국어 전용 음성으로 교체 가능
+ * 후보군
+ * 1. 0mlAtfsvMzFpppUuNWkV
+ * 2. r2b2z8wPmZeh7CQksHSs
+ * 3. 5BPXIholvVqIEs2WxN5F
  */
-export const KOREAN_MALE_VOICE_ID = 'nPczCjzI2devNBz1zQrb'
+const DEFAULT_KOREAN_MALE_VOICE_ID = '5BPXIholvVqIEs2WxN5F'
+export const KOREAN_MALE_VOICE_ID =
+  process.env.ELEVENLABS_VOICE_ID || DEFAULT_KOREAN_MALE_VOICE_ID
 
 /**
  * conversation_config 설정
@@ -34,7 +39,7 @@ export const prosecutorConversationConfig: ConversationConfig = {
 
   agent: {
     prompt: {
-      llm: 'gemini-3-flash-preview',
+      llm: 'gemini-2.5-flash-lite-preview-09-2025',
       prompt: BASE_SYSTEM_PROMPT,
     },
     first_message: FIRST_MESSAGE,
