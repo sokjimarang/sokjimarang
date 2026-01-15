@@ -68,15 +68,16 @@ test.describe('홈 화면', () => {
     await expect(page.getByText('시나리오 선택')).toBeVisible()
 
     // CTA 버튼
-    await expect(page.getByRole('button', { name: /전화하기/ })).toBeVisible()
+    await expect(page.getByRole('button', { name: /훈련 시작하기/ })).toBeVisible()
   })
 
   test('프리셋 카루셀에 프리셋 카드 표시', async ({ page }) => {
-    // 프리셋 카드 확인 (프리셋 1, 프리셋 2)
-    await expect(page.getByText('프리셋 1')).toBeVisible()
+    // 프리셋 카드 확인 (서울 50대 / 자녀 2명)
+    await expect(page.getByText('서울 50대 / 자녀 2명')).toBeVisible()
 
     // 프리셋 설명 텍스트 확인 (50대 / 서울 / 자녀 2명)
-    await expect(page.getByText(/50대/)).toBeVisible()
+    const presetCard = page.getByRole('button', { name: /서울 50대/ })
+    await expect(presetCard.getByText('50대 / 서울 / 자녀 2명')).toBeVisible()
   })
 
   test('시나리오 카루셀에 시나리오 카드 표시', async ({ page }) => {
@@ -85,16 +86,16 @@ test.describe('홈 화면', () => {
   })
 
   test('초기 상태에서 CTA 버튼 비활성화', async ({ page }) => {
-    const ctaButton = page.getByRole('button', { name: /전화하기/ })
+    const ctaButton = page.getByRole('button', { name: /훈련 시작하기/ })
     await expect(ctaButton).toBeDisabled()
   })
 
   test('프리셋만 선택 시 CTA 버튼 여전히 비활성화', async ({ page }) => {
-    // 프리셋 1 선택
-    await page.getByText('프리셋 1').click()
+    // 프리셋 선택
+    await page.getByRole('button', { name: /서울 50대/ }).click()
 
     // CTA 버튼 여전히 비활성화
-    const ctaButton = page.getByRole('button', { name: /전화하기/ })
+    const ctaButton = page.getByRole('button', { name: /훈련 시작하기/ })
     await expect(ctaButton).toBeDisabled()
   })
 
@@ -103,29 +104,29 @@ test.describe('홈 화면', () => {
     await page.getByText('검찰 사칭').click()
 
     // CTA 버튼 여전히 비활성화
-    const ctaButton = page.getByRole('button', { name: /전화하기/ })
+    const ctaButton = page.getByRole('button', { name: /훈련 시작하기/ })
     await expect(ctaButton).toBeDisabled()
   })
 
   test('프리셋 + 시나리오 모두 선택 시 CTA 버튼 활성화', async ({ page }) => {
     // 프리셋 선택
-    await page.getByText('프리셋 1').click()
+    await page.getByRole('button', { name: /서울 50대/ }).click()
 
     // 시나리오 선택
     await page.getByText('검찰 사칭').click()
 
     // CTA 버튼 활성화 확인
-    const ctaButton = page.getByRole('button', { name: /전화하기/ })
+    const ctaButton = page.getByRole('button', { name: /훈련 시작하기/ })
     await expect(ctaButton).toBeEnabled()
   })
 
   test('프리셋 카드 선택 시 체크 표시 (선택 스타일)', async ({ page }) => {
-    // 프리셋 1 선택
-    await page.getByText('프리셋 1').click()
+    // 프리셋 선택
+    await page.getByRole('button', { name: /서울 50대/ }).click()
 
-    // 선택된 카드의 스타일 확인 (border-blue-500 클래스)
-    const selectedCard = page.locator('button:has-text("프리셋 1")')
-    await expect(selectedCard).toHaveClass(/border-blue-500/)
+    // 선택된 카드의 스타일 확인 (border-primary-500 클래스)
+    const selectedCard = page.locator('button:has-text("서울 50대 / 자녀 2명")')
+    await expect(selectedCard).toHaveClass(/border-primary-500/)
   })
 
   test('시나리오 카드 선택 시 체크 표시 (선택 스타일)', async ({ page }) => {
@@ -134,12 +135,12 @@ test.describe('홈 화면', () => {
 
     // 선택된 카드의 스타일 확인
     const selectedCard = page.locator('button:has-text("검찰 사칭")')
-    await expect(selectedCard).toHaveClass(/border-blue-500/)
+    await expect(selectedCard).toHaveClass(/border-primary-500/)
   })
 
   test('프리셋 선택 시 userStore에 context 저장', async ({ page }) => {
-    // 프리셋 1 선택 (50대 / 서울 / 자녀 2명)
-    await page.getByText('프리셋 1').click()
+    // 프리셋 선택 (50대 / 서울 / 자녀 2명)
+    await page.getByRole('button', { name: /서울 50대/ }).click()
 
     // localStorage에 context 저장 확인
     const storage = await page.evaluate(() =>
@@ -151,7 +152,7 @@ test.describe('홈 화면', () => {
 
   test('선택 상태가 localStorage에 persist', async ({ page }) => {
     // 프리셋 + 시나리오 선택
-    await page.getByText('프리셋 1').click()
+    await page.getByRole('button', { name: /서울 50대/ }).click()
     await page.getByText('검찰 사칭').click()
 
     // localStorage에 선택 상태 저장 확인
@@ -218,7 +219,7 @@ test.describe('홈 화면 Swiper 카루셀', () => {
     }
 
     // 프리셋 2가 보이는지 확인 (이미 1.3개 노출이라 보일 수 있음)
-    await expect(page.getByText('프리셋 2')).toBeVisible()
+    await expect(page.getByText('경기 60대 / 손주 1명')).toBeVisible()
   })
 
   test('시나리오 카루셀 Swiper 컨테이너 렌더링', async ({ page }) => {

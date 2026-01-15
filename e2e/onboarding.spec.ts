@@ -65,8 +65,8 @@ test.describe('온보딩 플로우', () => {
     }
 
     // 모두 동의 체크박스 클릭
-    const agreeAllCheckbox = page.getByRole('checkbox').first()
-    await agreeAllCheckbox.check()
+    const agreeAllLabel = page.locator('label:has-text("모두 동의")')
+    await agreeAllLabel.click()
 
     // 모든 체크박스가 선택되었는지 확인
     const checkboxes = page.getByRole('checkbox')
@@ -92,10 +92,10 @@ test.describe('온보딩 플로우', () => {
     await expect(startButton).toBeDisabled()
 
     // 개별 체크박스 3개만 선택 (모두 동의 제외)
-    const checkboxes = page.getByRole('checkbox')
-    const allCheckboxes = await checkboxes.all()
-    for (let i = 1; i < allCheckboxes.length; i++) {
-      await allCheckboxes[i].check()
+    const checkboxLabels = page.locator('label:has(input[type="checkbox"])')
+    const allLabels = await checkboxLabels.all()
+    for (let i = 1; i < allLabels.length; i++) {
+      await allLabels[i].click()
     }
 
     // 시작 버튼 활성화 확인
@@ -125,8 +125,8 @@ test.describe('온보딩 플로우', () => {
     }
 
     // 모두 동의 체크박스로 전체 선택
-    const agreeAllCheckbox = page.getByRole('checkbox').first()
-    await agreeAllCheckbox.check()
+    const agreeAllLabel = page.locator('label:has-text("모두 동의")')
+    await agreeAllLabel.click()
 
     // 시작 버튼 클릭
     await page.getByRole('button', { name: '동의하고 시작' }).click()

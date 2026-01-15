@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { useTrainingStore } from '@/stores'
@@ -13,6 +13,7 @@ function CallPage() {
   const navigate = useNavigate()
   const { open } = useOverlay()
   const hasStartedRef = useRef(false)
+  const [waveTick, setWaveTick] = useState(0)
 
   const { currentSession, callDuration, isAiSpeaking, status, transcripts } = useTrainingStore()
 
@@ -44,6 +45,19 @@ function CallPage() {
       navigate('/training/debrief')
     }
   }, [status, navigate])
+
+  useEffect(() => {
+    if (!isAiSpeaking) {
+      setWaveTick(0)
+      return
+    }
+
+    const interval = setInterval(() => {
+      setWaveTick((tick) => (tick + 1) % 1000)
+    }, 120)
+
+    return () => clearInterval(interval)
+  }, [isAiSpeaking])
 
   const handleEndCall = async () => {
     const confirmed = await open<boolean>(({ close }) => (
@@ -95,7 +109,7 @@ function CallPage() {
                 }`}
                 style={{
                   height: isAiSpeaking
-                    ? `${20 + Math.sin((Date.now() / 100 + i) * 0.5) * 10}px`
+                    ? `${20 + Math.sin((waveTick / 2 + i) * 0.7) * 10}px`
                     : isConnected
                       ? '12px'
                       : '8px',
