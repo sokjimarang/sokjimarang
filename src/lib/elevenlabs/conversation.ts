@@ -50,10 +50,23 @@ export interface StartConversationWithContextOptions extends ConversationEventHa
  * UserContext를 Dynamic Variables로 변환
  */
 export function createDynamicVariables(userContext: UserContext): DynamicVariables {
+  const userName = userContext.user_name?.trim() || '선생님'
+  const hasChildren =
+    userContext.has_children ??
+    (userContext.children !== null && userContext.children !== undefined && userContext.children > 0)
+  const hasGrandchildren =
+    userContext.has_grandchildren ??
+    (userContext.grandchildren !== null &&
+      userContext.grandchildren !== undefined &&
+      userContext.grandchildren > 0)
+
   return {
+    user_name: userName,
     age_group: AGE_GROUP_LABELS[userContext.age_group ?? '50s'],
     region: REGION_LABELS[userContext.region ?? 'seoul'],
+    has_children: hasChildren,
     children: String(userContext.children ?? 0),
+    has_grandchildren: hasGrandchildren,
     grandchildren: String(userContext.grandchildren ?? 0),
   }
 }

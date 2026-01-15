@@ -13,22 +13,41 @@ export interface PresetData {
 export const PRESETS: PresetData[] = [
   {
     id: 'preset-1',
-    name: '프리셋 1',
+    name: '김성철',
     context: {
+      user_name: '김성철',
       age_group: '50s',
       region: 'seoul',
+      has_children: true,
       children: 2,
-      grandchildren: null,
+      has_grandchildren: false,
+      grandchildren: 0,
     },
   },
   {
     id: 'preset-2',
-    name: '프리셋 2',
+    name: '이영희',
     context: {
+      user_name: '이영희',
       age_group: '60s',
       region: 'gyeonggi',
+      has_children: true,
       children: 2,
+      has_grandchildren: true,
       grandchildren: 1,
+    },
+  },
+  {
+    id: 'preset-3',
+    name: '박정호',
+    context: {
+      user_name: '박정호',
+      age_group: '70plus',
+      region: 'other',
+      has_children: true,
+      children: 2,
+      has_grandchildren: true,
+      grandchildren: 2,
     },
   },
 ]
@@ -59,11 +78,19 @@ export function getUserContextDescription(context: UserContext): string {
   if (context.region) {
     parts.push(REGION_LABELS[context.region])
   }
-  if (context.children && context.children > 0) {
+  if (context.has_children === false) {
+    parts.push('자녀 없음')
+  } else if (context.children && context.children > 0) {
     parts.push(`자녀 ${context.children}명`)
+  } else if (context.has_children === true) {
+    parts.push('자녀 있음')
   }
-  if (context.grandchildren && context.grandchildren > 0) {
+  if (context.has_grandchildren === false) {
+    parts.push('손주 없음')
+  } else if (context.grandchildren && context.grandchildren > 0) {
     parts.push(`손주 ${context.grandchildren}명`)
+  } else if (context.has_grandchildren === true) {
+    parts.push('손주 있음')
   }
 
   return parts.join(' / ')

@@ -13,21 +13,33 @@ const REGION_LABELS: Record<string, string> = {
   other: '기타 지역',
 }
 
+const DEFAULT_USER_NAME = '선생님'
+
 function hasChildren(context: UserContext): boolean {
+  if (context.has_children !== undefined) {
+    return context.has_children
+  }
   return context.children !== null && context.children !== undefined && context.children > 0
 }
 
 function hasGrandchildren(context: UserContext): boolean {
-  return context.grandchildren !== null && context.grandchildren !== undefined && context.grandchildren > 0
+  if (context.has_grandchildren !== undefined) {
+    return context.has_grandchildren
+  }
+  return (
+    context.grandchildren !== null && context.grandchildren !== undefined && context.grandchildren > 0
+  )
 }
 
 function injectContext(template: string, context: UserContext): string {
   const ageGroupLabel = context.age_group ? AGE_GROUP_LABELS[context.age_group] : '어르신'
   const regionLabel = context.region ? REGION_LABELS[context.region] : '해당 지역'
+  const userName = context.user_name?.trim() || DEFAULT_USER_NAME
 
   return template
     .replace(/\{\{age_group\}\}/g, ageGroupLabel)
     .replace(/\{\{region\}\}/g, regionLabel)
+    .replace(/\{\{user_name\}\}/g, userName)
     .replace(/\{\{has_children\}\}/g, String(hasChildren(context)))
     .replace(/\{\{has_grandchildren\}\}/g, String(hasGrandchildren(context)))
 }

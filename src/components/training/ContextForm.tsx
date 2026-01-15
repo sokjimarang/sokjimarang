@@ -10,6 +10,10 @@ interface ContextFormProps {
 
 function ContextForm({ initialContext, onSubmit, onCancel }: ContextFormProps) {
   const [context, setContext] = useState<UserContext>(initialContext)
+  const hasChildren =
+    context.has_children ?? ((context.children ?? 0) > 0)
+  const hasGrandchildren =
+    context.has_grandchildren ?? ((context.grandchildren ?? 0) > 0)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -70,10 +74,15 @@ function ContextForm({ initialContext, onSubmit, onCancel }: ContextFormProps) {
           <label className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 cursor-pointer hover:border-gray-300">
             <input
               type="checkbox"
-              checked={(context.children ?? 0) > 0}
-              onChange={(e) =>
-                setContext({ ...context, children: e.target.checked ? 1 : null })
-              }
+              checked={hasChildren}
+              onChange={(e) => {
+                const checked = e.target.checked
+                setContext({
+                  ...context,
+                  has_children: checked,
+                  children: checked ? (context.children && context.children > 0 ? context.children : 1) : null,
+                })
+              }}
               className="w-5 h-5 rounded border-gray-300 text-blue-500 focus:ring-blue-500"
             />
             <span className="text-gray-700">자녀가 있습니다</span>
@@ -81,10 +90,19 @@ function ContextForm({ initialContext, onSubmit, onCancel }: ContextFormProps) {
           <label className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 cursor-pointer hover:border-gray-300">
             <input
               type="checkbox"
-              checked={(context.grandchildren ?? 0) > 0}
-              onChange={(e) =>
-                setContext({ ...context, grandchildren: e.target.checked ? 1 : null })
-              }
+              checked={hasGrandchildren}
+              onChange={(e) => {
+                const checked = e.target.checked
+                setContext({
+                  ...context,
+                  has_grandchildren: checked,
+                  grandchildren: checked
+                    ? context.grandchildren && context.grandchildren > 0
+                      ? context.grandchildren
+                      : 1
+                    : null,
+                })
+              }}
               className="w-5 h-5 rounded border-gray-300 text-blue-500 focus:ring-blue-500"
             />
             <span className="text-gray-700">손자녀가 있습니다</span>

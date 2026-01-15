@@ -50,12 +50,21 @@ const useUserStore = create<UserStore>()(
 
       setChildren: (children) =>
         set((state) => ({
-          context: { ...state.context, children },
+          context: {
+            ...state.context,
+            children,
+            has_children: children !== null && children !== undefined && children > 0,
+          },
         })),
 
       setGrandchildren: (grandchildren) =>
         set((state) => ({
-          context: { ...state.context, grandchildren },
+          context: {
+            ...state.context,
+            grandchildren,
+            has_grandchildren:
+              grandchildren !== null && grandchildren !== undefined && grandchildren > 0,
+          },
         })),
 
       updateContext: (context) =>

@@ -6,9 +6,12 @@ export type AgeGroup = 'under50' | '50s' | '60s' | '70plus'
 export type Region = 'seoul' | 'gyeonggi' | 'other'
 
 export interface UserContext {
+  user_name?: string
   age_group?: AgeGroup
   region?: Region
+  has_children?: boolean
   children?: number | null
+  has_grandchildren?: boolean
   grandchildren?: number | null
 }
 
