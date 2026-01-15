@@ -216,7 +216,8 @@ export const workflowEdges: Record<string, WorkflowEdge> = {
     target: 'stage3_isolate',
     forward_condition: {
       type: 'llm',
-      condition: '사용자가 걱정하거나, 어떻게 해야 하는지 물어보거나, 자신은 안 했다고 해명하려 함',
+      condition:
+        '사용자가 걱정하거나, 어떻게 해야 하는지 물어보거나, 자신은 안 했다고 해명하려 함. 또는 "네", "알겠습니다", "진행하세요", "빨리 하세요" 같은 동의/협조 표현',
     },
   },
   stage2_to_persuade2: {
@@ -260,7 +261,8 @@ export const workflowEdges: Record<string, WorkflowEdge> = {
     target: 'stage4_action',
     forward_condition: {
       type: 'llm',
-      condition: '사용자가 수긍하거나, 다음 지시를 기다리거나, 걱정하는 반응을 보임',
+      condition:
+        '사용자가 수긍하거나, 다음 지시를 기다리거나, 걱정하는 반응을 보임. 또는 "네", "알겠어요", "계속 말씀하세요", "확인했습니다", "빨리 하세요" 같은 동의/진행 요청',
     },
   },
   stage3_to_persuade3: {
