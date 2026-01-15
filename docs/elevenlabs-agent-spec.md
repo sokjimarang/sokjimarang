@@ -32,7 +32,7 @@
 | 항목 | 값 | 비고 |
 |------|-----|------|
 | agent_id | `agent_8701kevwbv8sf8c9f24ky04nd2qm` | 환경변수: `VITE_ELEVENLABS_AGENT_ID` |
-| LLM | `gpt-4o-mini` | conversation_config에 명시 필요 |
+| LLM | `gpt-4o` | conversation_config에 명시 필요 |
 | Voice | `nPczCjzI2devNBz1zQrb` | Brian (영어/한국어 지원) |
 | TTS Model | `eleven_turbo_v2_5` | 한국어 필수 (turbo/flash v2_5만 지원) |
 | ASR | `elevenlabs` + `ko` | 한국어 음성 인식 |
@@ -51,7 +51,7 @@
   },
   agent: {
     prompt: {
-      llm: 'gpt-4o-mini',       // ⚠️ 필수 필드
+      llm: 'gemini-3-flash-preview',       // ⚠️ 필수 필드
       prompt: BASE_SYSTEM_PROMPT,
     },
     first_message: FIRST_MESSAGE,
@@ -398,7 +398,7 @@ tts: {
 ```typescript
 agent: {
   prompt: {
-    llm: 'gpt-4o-mini',  // ✅ 필수
+    llm: 'gpt-4o',  // ✅ 필수
     prompt: BASE_SYSTEM_PROMPT,
   },
 }

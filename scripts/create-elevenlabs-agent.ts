@@ -74,7 +74,11 @@ async function createAgentViaEdgeFunction() {
 }
 
 async function main() {
-  console.log('🚀 ElevenLabs Agent 생성 시작\n')
+  const idOnly = process.argv.includes('--id-only')
+
+  if (!idOnly) {
+    console.log('🚀 ElevenLabs Agent 생성 시작\n')
+  }
 
   try {
     let result
@@ -93,6 +97,11 @@ async function main() {
       process.exit(1)
     }
 
+    if (idOnly) {
+      console.log(result.agent_id)
+      return
+    }
+
     console.log('\n✅ 에이전트 생성 완료!')
     console.log('━'.repeat(50))
     console.log('Agent ID:', result.agent_id)
@@ -103,7 +112,7 @@ async function main() {
     console.log('   2. ElevenLabs 대시보드에서 확인:')
     console.log('      https://elevenlabs.io/app/agents')
   } catch (error) {
-    console.error('\n❌ 에이전트 생성 실패:', error)
+    console.error(idOnly ? String(error) : `\n❌ 에이전트 생성 실패: ${String(error)}`)
     process.exit(1)
   }
 }

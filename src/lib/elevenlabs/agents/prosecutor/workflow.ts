@@ -7,6 +7,7 @@
  * - stage 노드 (5개): stage1_contact ~ stage5_transfer
  * - persuade 노드 (5개): persuade1_soft ~ persuade5_final
  * - end 노드 (3개): end_rejected, end_suspected, end_fooled
+ * - end 프롬프트 노드 (3개): end_rejected_prompt, end_suspected_prompt, end_fooled_prompt
  *
  * 분기 조건: LLM Condition (자연어 기반)
  */
@@ -14,9 +15,10 @@
 import type { StartNode, OverrideAgentNode, EndNode, WorkflowEdge } from '../../types'
 import { STAGE_PROMPTS } from './prompts/stages'
 import { PERSUADE_PROMPTS } from './prompts/persuades'
+import { END_PROMPTS } from './prompts/endings'
 
 // ============================================
-// 노드 정의 (14개)
+// 노드 정의 (17개)
 // ============================================
 
 // Start 노드 - "start"는 ElevenLabs 예약어이므로 "start_node" 사용
@@ -102,6 +104,29 @@ const agentNodes: Record<string, OverrideAgentNode> = {
     additional_prompt: PERSUADE_PROMPTS.persuade5_final,
     edge_order: ['persuade5_to_fooled', 'persuade5_to_suspected'],
   },
+
+  // End 프롬프트 노드들 (종료 메시지 출력 후 end 노드로 이동)
+  end_rejected_prompt: {
+    type: 'override_agent',
+    label: '종료 안내 (거부)',
+    position: { x: 1100, y: 500 },
+    additional_prompt: END_PROMPTS.end_rejected,
+    edge_order: ['end_rejected_prompt_to_end_rejected'],
+  },
+  end_suspected_prompt: {
+    type: 'override_agent',
+    label: '종료 안내 (의심)',
+    position: { x: 1100, y: 100 },
+    additional_prompt: END_PROMPTS.end_suspected,
+    edge_order: ['end_suspected_prompt_to_end_suspected'],
+  },
+  end_fooled_prompt: {
+    type: 'override_agent',
+    label: '종료 안내 (속음)',
+    position: { x: 1100, y: 300 },
+    additional_prompt: END_PROMPTS.end_fooled,
+    edge_order: ['end_fooled_prompt_to_end_fooled'],
+  },
 }
 
 // End 노드들 (3개) - end 타입은 edge_order, additional_prompt 없음
@@ -128,7 +153,7 @@ export const workflowNodes = {
 }
 
 // ============================================
-// 엣지 정의 (25개)
+// 엣지 정의 (28개)
 // ============================================
 
 export const workflowEdges: Record<string, WorkflowEdge> = {
@@ -160,7 +185,7 @@ export const workflowEdges: Record<string, WorkflowEdge> = {
   },
   stage1_to_rejected: {
     source: 'stage1_contact',
-    target: 'end_rejected',
+    target: 'end_rejected_prompt',
     forward_condition: {
       type: 'llm',
       condition: '사용자가 "끊을게요", "112에 확인할게요", "가족한테 물어볼게요" 등 명확히 거부하거나 외부 확인 의사를 밝힘',
@@ -178,7 +203,7 @@ export const workflowEdges: Record<string, WorkflowEdge> = {
   },
   persuade1_to_suspected: {
     source: 'persuade1_soft',
-    target: 'end_suspected',
+    target: 'end_suspected_prompt',
     forward_condition: {
       type: 'llm',
       condition: '사용자가 계속 의심하거나, 끊겠다고 하거나, 확인하겠다고 고집함',
@@ -204,7 +229,7 @@ export const workflowEdges: Record<string, WorkflowEdge> = {
   },
   stage2_to_rejected: {
     source: 'stage2_fear',
-    target: 'end_rejected',
+    target: 'end_rejected_prompt',
     forward_condition: {
       type: 'llm',
       condition: '사용자가 끊겠다고 하거나, 외부에 확인하겠다고 함',
@@ -222,7 +247,7 @@ export const workflowEdges: Record<string, WorkflowEdge> = {
   },
   persuade2_to_suspected: {
     source: 'persuade2_reassure',
-    target: 'end_suspected',
+    target: 'end_suspected_prompt',
     forward_condition: {
       type: 'llm',
       condition: '사용자가 여전히 의심하거나 거부함',
@@ -248,7 +273,7 @@ export const workflowEdges: Record<string, WorkflowEdge> = {
   },
   stage3_to_rejected: {
     source: 'stage3_isolate',
-    target: 'end_rejected',
+    target: 'end_rejected_prompt',
     forward_condition: {
       type: 'llm',
       condition: '사용자가 "가족한테 먼저 물어볼게요", "끊을게요" 등 거부',
@@ -266,7 +291,7 @@ export const workflowEdges: Record<string, WorkflowEdge> = {
   },
   persuade3_to_suspected: {
     source: 'persuade3_aggressive',
-    target: 'end_suspected',
+    target: 'end_suspected_prompt',
     forward_condition: {
       type: 'llm',
       condition: '사용자가 "그래도 끊을게요", "확인할게요" 등 입장을 고수',
@@ -292,7 +317,7 @@ export const workflowEdges: Record<string, WorkflowEdge> = {
   },
   stage4_to_rejected: {
     source: 'stage4_action',
-    target: 'end_rejected',
+    target: 'end_rejected_prompt',
     forward_condition: {
       type: 'llm',
       condition: '사용자가 정보 제공을 거부하거나 끊겠다고 함',
@@ -310,7 +335,7 @@ export const workflowEdges: Record<string, WorkflowEdge> = {
   },
   persuade4_to_suspected: {
     source: 'persuade4_legal',
-    target: 'end_suspected',
+    target: 'end_suspected_prompt',
     forward_condition: {
       type: 'llm',
       condition: '사용자가 거부를 고수하거나 끊겠다고 함',
@@ -320,7 +345,7 @@ export const workflowEdges: Record<string, WorkflowEdge> = {
   // Stage5 분기
   stage5_to_fooled: {
     source: 'stage5_transfer',
-    target: 'end_fooled',
+    target: 'end_fooled_prompt',
     forward_condition: {
       type: 'llm',
       condition: '사용자가 이체하겠다고 하거나, 계좌번호를 받아적거나, 협조 의사를 보임',
@@ -336,7 +361,7 @@ export const workflowEdges: Record<string, WorkflowEdge> = {
   },
   stage5_to_rejected: {
     source: 'stage5_transfer',
-    target: 'end_rejected',
+    target: 'end_rejected_prompt',
     forward_condition: {
       type: 'llm',
       condition: '사용자가 명확히 거부하거나 끊겠다고 함',
@@ -346,7 +371,7 @@ export const workflowEdges: Record<string, WorkflowEdge> = {
   // Persuade5 분기
   persuade5_to_fooled: {
     source: 'persuade5_final',
-    target: 'end_fooled',
+    target: 'end_fooled_prompt',
     forward_condition: {
       type: 'llm',
       condition: '사용자가 두려워서 협조하겠다고 함',
@@ -354,10 +379,33 @@ export const workflowEdges: Record<string, WorkflowEdge> = {
   },
   persuade5_to_suspected: {
     source: 'persuade5_final',
-    target: 'end_suspected',
+    target: 'end_suspected_prompt',
     forward_condition: {
       type: 'llm',
       condition: '사용자가 끝까지 거부',
+    },
+  },
+
+  // End Prompt → End (무조건 종료)
+  end_rejected_prompt_to_end_rejected: {
+    source: 'end_rejected_prompt',
+    target: 'end_rejected',
+    forward_condition: {
+      type: 'unconditional',
+    },
+  },
+  end_suspected_prompt_to_end_suspected: {
+    source: 'end_suspected_prompt',
+    target: 'end_suspected',
+    forward_condition: {
+      type: 'unconditional',
+    },
+  },
+  end_fooled_prompt_to_end_fooled: {
+    source: 'end_fooled_prompt',
+    target: 'end_fooled',
+    forward_condition: {
+      type: 'unconditional',
     },
   },
 }

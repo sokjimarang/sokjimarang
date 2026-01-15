@@ -63,6 +63,7 @@ async function updateAgent() {
       body: JSON.stringify({
         name: agentRequest.name,
         conversation_config: agentRequest.conversation_config,
+        workflow: agentRequest.workflow,
       }),
     }
   )
