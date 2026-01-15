@@ -16,7 +16,7 @@ import { createProsecutorAgentRequest } from '../src/lib/elevenlabs/agents/prose
 
 // .env.local 파일에서 환경변수 로드
 function loadEnvFile() {
-  const envPath = path.join(process.cwd(), '.env.local')
+  const envPath = path.join(process.cwd(), '.env')
   if (fs.existsSync(envPath)) {
     const envContent = fs.readFileSync(envPath, 'utf-8')
     for (const line of envContent.split('\n')) {
