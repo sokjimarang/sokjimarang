@@ -48,7 +48,6 @@ function CallPage() {
 
   useEffect(() => {
     if (!isAiSpeaking) {
-      setWaveTick(0)
       return
     }
 
@@ -58,6 +57,8 @@ function CallPage() {
 
     return () => clearInterval(interval)
   }, [isAiSpeaking])
+
+  const waveDisplayTick = isAiSpeaking ? waveTick : 0
 
   const handleEndCall = async () => {
     const confirmed = await open<boolean>(({ close }) => (
@@ -109,7 +110,7 @@ function CallPage() {
                 }`}
                 style={{
                   height: isAiSpeaking
-                    ? `${20 + Math.sin((waveTick / 2 + i) * 0.7) * 10}px`
+                    ? `${20 + Math.sin((waveDisplayTick / 2 + i) * 0.7) * 10}px`
                     : isConnected
                       ? '12px'
                       : '8px',
