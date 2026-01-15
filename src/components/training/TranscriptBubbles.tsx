@@ -17,7 +17,7 @@ function TranscriptBubbles({ transcripts }: TranscriptBubblesProps) {
   if (transcripts.length === 0) {
     return (
       <div className="flex-1 flex items-center justify-center">
-        <p className="text-gray-500 text-sm">대화가 시작되면 여기에 표시됩니다</p>
+        <p className="text-neutral-400 text-sm">대화가 시작되면 여기에 표시됩니다</p>
       </div>
     )
   }
@@ -32,8 +32,8 @@ function TranscriptBubbles({ transcripts }: TranscriptBubblesProps) {
           <div
             className={`max-w-[80%] px-4 py-2.5 rounded-2xl ${
               message.speaker === 'user'
-                ? 'bg-blue-500 text-white rounded-br-sm'
-                : 'bg-gray-700 text-gray-100 rounded-bl-sm'
+                ? 'bg-primary-500 text-white rounded-br-sm'
+                : 'bg-dark-surface text-neutral-100 rounded-bl-sm'
             }`}
           >
             <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.text}</p>

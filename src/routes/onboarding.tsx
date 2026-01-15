@@ -1,25 +1,32 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import {
+  ChartBarIcon,
+  CpuChipIcon,
+  CheckCircleIcon,
+  CheckIcon,
+} from '@heroicons/react/24/solid'
 import { useUserStore } from '@/stores'
+import { Button } from '@/components/ui/Button'
 
 const ONBOARDING_PAGES = [
   {
     title: '보이스피싱, 겪어봐야 압니다',
     description:
       '매년 3,000억원 이상의 피해가 발생합니다.\n50대 이상이 절반 이상을 차지합니다.',
-    icon: '📊',
+    icon: <ChartBarIcon className="w-12 h-12 text-white" />,
   },
   {
     title: 'AI가 사기범 역할을 합니다',
     description:
       '실제 보이스피싱과 유사한 전화가 옵니다.\n안전하게 체험해보세요.',
-    icon: '🤖',
+    icon: <CpuChipIcon className="w-12 h-12 text-white" />,
   },
   {
     title: '속아도 괜찮습니다',
     description:
       '훈련입니다. 끝나면 무엇이 수상했는지 알려드립니다.',
-    icon: '✅',
+    icon: <CheckCircleIcon className="w-12 h-12 text-white" />,
   },
 ]
 
@@ -79,12 +86,12 @@ function OnboardingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-primary-50/30 flex flex-col">
       <header className="p-4 flex justify-between items-center">
         {currentPage > 0 ? (
           <button
             onClick={handlePrev}
-            className="text-gray-500 text-sm hover:text-gray-700"
+            className="text-neutral-500 text-sm hover:text-neutral-700 font-medium"
           >
             이전
           </button>
@@ -94,7 +101,7 @@ function OnboardingPage() {
         {!isConsentPage && (
           <button
             onClick={handleSkip}
-            className="text-gray-500 text-sm hover:text-gray-700"
+            className="text-neutral-500 text-sm hover:text-neutral-700 font-medium"
           >
             건너뛰기
           </button>
@@ -104,49 +111,78 @@ function OnboardingPage() {
       <main className="flex-1 flex flex-col items-center justify-center px-6">
         {!isConsentPage ? (
           <>
-            <div className="text-7xl mb-8">
+            {/* 아이콘 영역 */}
+            <div className="w-24 h-24 mb-8 rounded-3xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center shadow-lg shadow-primary-200">
               {ONBOARDING_PAGES[currentPage].icon}
             </div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-4 text-center">
+            <h1 className="text-2xl font-bold text-neutral-900 mb-4 text-center">
               {ONBOARDING_PAGES[currentPage].title}
             </h1>
-            <p className="text-gray-600 text-center whitespace-pre-line leading-relaxed">
+            <p className="text-neutral-600 text-center whitespace-pre-line leading-relaxed">
               {ONBOARDING_PAGES[currentPage].description}
             </p>
           </>
         ) : (
           <div className="w-full max-w-sm">
-            <h1 className="text-2xl font-bold text-gray-900 mb-2 text-center">
+            <h1 className="text-2xl font-bold text-neutral-900 mb-2 text-center">
               서비스 이용을 위해
             </h1>
-            <p className="text-gray-600 text-center mb-8">
+            <p className="text-neutral-600 text-center mb-8">
               다음에 동의해주세요
             </p>
 
             {/* 모두 동의 */}
-            <label className="flex items-center gap-3 p-4 bg-blue-50 rounded-xl border-2 border-blue-200 cursor-pointer hover:border-blue-300 transition-colors mb-4">
+            <label
+              className={`flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all mb-4 ${
+                allConsentsAgreed
+                  ? 'bg-primary-50 border-primary-500'
+                  : 'bg-white border-neutral-200 hover:border-primary-300'
+              }`}
+            >
+              <div
+                className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all ${
+                  allConsentsAgreed
+                    ? 'bg-primary-500 border-primary-500'
+                    : 'bg-white border-neutral-300'
+                }`}
+              >
+                {allConsentsAgreed && <CheckIcon className="w-4 h-4 text-white" />}
+              </div>
               <input
                 type="checkbox"
                 checked={allConsentsAgreed}
                 onChange={handleAgreeAll}
-                className="w-5 h-5 rounded border-gray-300 text-blue-500 focus:ring-blue-500"
+                className="sr-only"
               />
-              <span className="text-gray-900 font-semibold">모두 동의</span>
+              <span className="text-neutral-900 font-semibold">모두 동의</span>
             </label>
 
-            <div className="space-y-4">
+            <div className="space-y-3">
               {CONSENT_ITEMS.map((item) => (
                 <label
                   key={item.id}
-                  className="flex items-center gap-3 p-4 bg-white rounded-xl border border-gray-200 cursor-pointer hover:border-blue-300 transition-colors"
+                  className={`flex items-center gap-3 p-4 rounded-xl border cursor-pointer transition-all ${
+                    consents[item.id]
+                      ? 'bg-primary-50 border-primary-200'
+                      : 'bg-white border-neutral-200 hover:border-primary-300'
+                  }`}
                 >
+                  <div
+                    className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all ${
+                      consents[item.id]
+                        ? 'bg-primary-500 border-primary-500'
+                        : 'bg-white border-neutral-300'
+                    }`}
+                  >
+                    {consents[item.id] && <CheckIcon className="w-4 h-4 text-white" />}
+                  </div>
                   <input
                     type="checkbox"
                     checked={consents[item.id]}
                     onChange={() => handleConsentChange(item.id)}
-                    className="w-5 h-5 rounded border-gray-300 text-blue-500 focus:ring-blue-500"
+                    className="sr-only"
                   />
-                  <span className="text-gray-700">{item.label}</span>
+                  <span className="text-neutral-700 font-medium">{item.label}</span>
                 </label>
               ))}
             </div>
@@ -160,31 +196,26 @@ function OnboardingPage() {
             <div
               key={index}
               className={`w-2 h-2 rounded-full transition-colors ${
-                index === currentPage ? 'bg-blue-500' : 'bg-gray-300'
+                index === currentPage ? 'bg-primary-500' : 'bg-neutral-300'
               }`}
             />
           ))}
         </div>
 
         {!isConsentPage ? (
-          <button
-            onClick={handleNext}
-            className="w-full py-4 bg-blue-500 text-white rounded-xl font-medium hover:bg-blue-600 transition-colors"
-          >
+          <Button variant="primary" size="lg" onClick={handleNext} className="w-full">
             다음
-          </button>
+          </Button>
         ) : (
-          <button
+          <Button
+            variant="primary"
+            size="lg"
             onClick={handleStart}
             disabled={!allConsentsAgreed}
-            className={`w-full py-4 rounded-xl font-medium transition-colors ${
-              allConsentsAgreed
-                ? 'bg-blue-500 text-white hover:bg-blue-600'
-                : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-            }`}
+            className="w-full"
           >
             동의하고 시작
-          </button>
+          </Button>
         )}
       </footer>
     </div>

@@ -1,7 +1,9 @@
 import { useNavigate } from 'react-router-dom'
+import { PhoneIcon } from '@heroicons/react/24/solid'
 
 import { useTrainingStore } from '@/stores/trainingStore'
 import { getPresetById } from '@/lib/presets'
+import { Button } from '@/components/ui/Button'
 import type { ScenarioType } from '@/types/database'
 
 interface FixedCTAProps {
@@ -26,25 +28,18 @@ function FixedCTA({ selectedPresetId, selectedScenario }: FixedCTAProps) {
   }
 
   return (
-    <div className="flex-shrink-0 bg-white border-t border-gray-200 p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
-      <button
+    <div className="flex-shrink-0 bg-white/80 backdrop-blur-sm border-t border-neutral-100 p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+      <Button
         type="button"
+        variant="primary"
+        size="lg"
         onClick={handleClick}
         disabled={!isEnabled}
-        className={`
-          w-full py-4 rounded-xl font-semibold text-lg
-          flex items-center justify-center gap-2
-          transition-all duration-200
-          ${
-            isEnabled
-              ? 'bg-blue-500 text-white hover:bg-blue-600 active:scale-[0.98]'
-              : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-          }
-        `}
+        className="w-full"
+        icon={<PhoneIcon className="w-6 h-6" />}
       >
-        <span className="text-xl">📞</span>
-        전화하기
-      </button>
+        훈련 시작하기
+      </Button>
     </div>
   )
 }

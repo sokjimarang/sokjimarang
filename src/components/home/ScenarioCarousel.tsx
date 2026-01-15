@@ -1,4 +1,5 @@
 import { Swiper, SwiperSlide } from 'swiper/react'
+import { ScaleIcon } from '@heroicons/react/24/outline'
 import 'swiper/css'
 
 import { SelectableCard } from './SelectableCard'
@@ -8,6 +9,14 @@ import type { ScenarioType } from '@/types/database'
 // MVP에서는 prosecutor 시나리오만 사용
 const MVP_SCENARIOS: ScenarioType[] = ['prosecutor']
 
+// 시나리오별 아이콘 매핑
+const SCENARIO_ICONS: Record<ScenarioType, React.ReactNode> = {
+  prosecutor: <ScaleIcon className="w-6 h-6 text-primary-600" />,
+  bank: <ScaleIcon className="w-6 h-6 text-primary-600" />, // 임시: 추후 BankIcon으로 변경
+  family_emergency: <ScaleIcon className="w-6 h-6 text-primary-600" />, // 임시
+  delivery_subsidy: <ScaleIcon className="w-6 h-6 text-primary-600" />, // 임시
+}
+
 interface ScenarioCarouselProps {
   selectedScenario: ScenarioType | 'random'
   onSelectScenario: (scenario: ScenarioType) => void
@@ -15,10 +24,11 @@ interface ScenarioCarouselProps {
 
 function ScenarioCarousel({ selectedScenario, onSelectScenario }: ScenarioCarouselProps) {
   return (
-    <section className="py-4">
-      <h2 className="text-lg font-semibold text-gray-900 px-4 mb-3">
-        시나리오 선택
-      </h2>
+    <section className="py-6 animate-slide-up" style={{ animationDelay: '100ms' }}>
+      <div className="px-4 mb-4 flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-neutral-800">시나리오 선택</h2>
+        <span className="text-xs text-neutral-400 font-medium">2/2 단계</span>
+      </div>
       <Swiper
         slidesPerView={1.3}
         spaceBetween={12}
@@ -33,7 +43,7 @@ function ScenarioCarousel({ selectedScenario, onSelectScenario }: ScenarioCarous
           return (
             <SwiperSlide key={scenarioId}>
               <SelectableCard
-                icon={metadata.icon}
+                icon={SCENARIO_ICONS[scenarioId]}
                 title={metadata.name}
                 description={metadata.description}
                 selected={selectedScenario === scenarioId}

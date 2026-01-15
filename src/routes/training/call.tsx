@@ -7,6 +7,7 @@ import { getScenarioMetadata } from '@/lib/scenarios'
 import { formatTime } from '@/lib/time'
 import { useOverlay, ConfirmModal } from '@/components/ui/overlay'
 import { TranscriptBubbles } from '@/components/training/TranscriptBubbles'
+import { Button } from '@/components/ui/Button'
 
 function CallPage() {
   const navigate = useNavigate()
@@ -64,39 +65,47 @@ function CallPage() {
   if (!scenario) return null
 
   return (
-    <div className="h-screen bg-gray-900 text-white flex flex-col">
+    <div className="h-screen bg-dark-bg text-white flex flex-col">
       {/* 상단: 연결 상태 + 시간 + 음성 파형 */}
-      <header className="flex-shrink-0 pt-8 pb-4 px-4">
-        <div className="flex flex-col items-center gap-3">
-          <div className="text-center">
-            <p className="text-xl font-medium mb-1">
+      <header className="flex-shrink-0 pt-safe-top pt-8 pb-6 px-4">
+        <div className="flex flex-col items-center gap-4">
+          {/* 상태 표시 */}
+          <div className="px-4 py-2 rounded-full bg-dark-surface/50 backdrop-blur-sm border border-dark-border">
+            <p className="text-sm font-medium text-neutral-300">
               {isConnecting ? '연결 중...' : isConnected ? '통화 중' : '준비 중'}
             </p>
-            <p className="text-3xl font-mono">{formatTime(callDuration)}</p>
           </div>
 
-          <div className="flex items-center justify-center gap-1 h-6">
+          {/* 타이머 */}
+          <p className="text-4xl font-mono font-semibold tabular-nums">
+            {formatTime(callDuration)}
+          </p>
+
+          {/* 음성 파형 */}
+          <div className="flex items-end gap-1 h-12">
             {Array.from({ length: 12 }).map((_, i) => (
               <div
                 key={i}
-                className={`w-1.5 rounded-full transition-all ${
+                className={`w-1 rounded-full transition-all duration-150 ${
                   isAiSpeaking
-                    ? 'bg-green-500 animate-pulse'
+                    ? 'bg-gradient-to-t from-dark-accent to-primary-300'
                     : isConnected
-                      ? 'bg-blue-500'
-                      : 'bg-gray-600'
+                      ? 'bg-dark-accent'
+                      : 'bg-dark-border'
                 }`}
                 style={{
-                  height: isAiSpeaking ? '20px' : isConnected ? '12px' : '6px',
+                  height: isAiSpeaking
+                    ? `${20 + Math.sin((Date.now() / 100 + i) * 0.5) * 10}px`
+                    : isConnected
+                      ? '12px'
+                      : '8px',
                   animationDelay: isAiSpeaking ? `${i * 50}ms` : undefined,
                 }}
               />
             ))}
           </div>
 
-          {error && (
-            <p className="text-red-400 text-sm text-center">{error}</p>
-          )}
+          {error && <p className="text-danger-400 text-sm text-center">{error}</p>}
         </div>
       </header>
 
@@ -104,18 +113,16 @@ function CallPage() {
       <TranscriptBubbles transcripts={transcripts} />
 
       {/* 하단: 종료 버튼 */}
-      <footer className="flex-shrink-0 p-6">
-        <button
+      <footer className="flex-shrink-0 p-4 pb-safe-bottom">
+        <Button
+          variant="danger"
+          size="lg"
           onClick={handleEndCall}
           disabled={!isConnected && !isConnecting}
-          className={`w-full py-4 rounded-xl font-medium transition-colors ${
-            isConnected || isConnecting
-              ? 'bg-red-500 text-white hover:bg-red-600'
-              : 'bg-gray-700 text-gray-400 cursor-not-allowed'
-          }`}
+          className="w-full shadow-lg shadow-danger-500/20"
         >
           훈련 종료
-        </button>
+        </Button>
       </footer>
     </div>
   )

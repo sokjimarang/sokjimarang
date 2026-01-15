@@ -1,4 +1,5 @@
 import { Swiper, SwiperSlide } from 'swiper/react'
+import { UserIcon } from '@heroicons/react/24/outline'
 import 'swiper/css'
 
 import { SelectableCard } from './SelectableCard'
@@ -11,10 +12,11 @@ interface PresetCarouselProps {
 
 function PresetCarousel({ selectedPresetId, onSelectPreset }: PresetCarouselProps) {
   return (
-    <section className="py-4">
-      <h2 className="text-lg font-semibold text-gray-900 px-4 mb-3">
-        내 정보 선택
-      </h2>
+    <section className="py-6 animate-slide-up">
+      <div className="px-4 mb-4 flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-neutral-800">내 정보 선택</h2>
+        <span className="text-xs text-neutral-400 font-medium">1/2 단계</span>
+      </div>
       <Swiper
         slidesPerView={1.3}
         spaceBetween={12}
@@ -25,7 +27,7 @@ function PresetCarousel({ selectedPresetId, onSelectPreset }: PresetCarouselProp
         {PRESETS.map((preset) => (
           <SwiperSlide key={preset.id}>
             <SelectableCard
-              icon="👤"
+              icon={<UserIcon className="w-6 h-6 text-primary-600" />}
               title={preset.name}
               description={getUserContextDescription(preset.context)}
               selected={selectedPresetId === preset.id}
