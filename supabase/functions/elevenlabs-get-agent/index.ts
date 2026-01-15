@@ -1,3 +1,4 @@
+/// <reference path="../deno.d.ts" />
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
 
 /**

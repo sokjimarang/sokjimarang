@@ -6,13 +6,15 @@ import type { ScenarioType, TrainingSession } from '@/types/database'
 type TrainingStatus = 'idle' | 'preparing' | 'in_call' | 'debriefing' | 'completed'
 
 const createSessionId = () => {
-  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
-    return crypto.randomUUID()
+  const cryptoApi = typeof globalThis.crypto !== 'undefined' ? globalThis.crypto : undefined
+
+  if (cryptoApi?.randomUUID) {
+    return cryptoApi.randomUUID()
   }
 
-  if (typeof crypto !== 'undefined' && 'getRandomValues' in crypto) {
+  if (cryptoApi?.getRandomValues) {
     const bytes = new Uint8Array(16)
-    crypto.getRandomValues(bytes)
+    cryptoApi.getRandomValues(bytes)
     bytes[6] = (bytes[6] & 0x0f) | 0x40
     bytes[8] = (bytes[8] & 0x3f) | 0x80
     const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, '0'))
